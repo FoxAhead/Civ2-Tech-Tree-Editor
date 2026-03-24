@@ -1,0 +1,99 @@
+/* style.css */
+
+/* Базовые настройки экрана */
+/* body,
+html {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+} */
+
+#app {
+  height: 100dvh;
+}
+
+/* Главный контейнер под шапкой */
+.main-container {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  /* Чтобы скроллился только сайдбар, а не страница */
+}
+
+/* Сайдбар */
+#sidebar {
+  width: 350px;
+  flex: 0 0 350px;
+  background: #f8f9fa;
+  border-right: 1px solid #dee2e6;
+  overflow-y: auto;
+  /* Включаем прокрутку, если параметров много */
+  transition: margin-left 0.3s ease, opacity 0.3s ease;
+  z-index: 10;
+}
+
+/* Класс для скрытия сайдбара */
+#sidebar.hidden {
+  margin-left: -350px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Область графа */
+#vis-container {
+  /* flex: 1; */
+  background: #ffffff;
+  /* position: relative; */
+}
+
+/* Шапка */
+.na1vbar {
+  z-index: 1050;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* .navbar-brand {
+  font-weight: bold;
+  letter-spacing: 0.5px;
+} */
+
+.dragging-active {
+  outline: 4px dashed #36F;
+  outline-offset: -10px;
+  background-color: rgba(51, 102, 255, 0.05) !important;
+}
+
+.clickable-tech {
+  cursor: pointer;
+  color: #0d6efd;
+  /* Цвет ссылки Bootstrap */
+  text-decoration: none;
+}
+
+.clickable-tech:hover {
+  /* text-decoration: underline; */
+  color: #0a58ca;
+}
+
+#visConfig {
+  max-height: 400px;
+  /* Ограничиваем высоту, чтобы не вытеснять редактор */
+  overflow-y: auto;
+  font-size: 12px;
+  /* Настройки Vis часто громоздкие */
+}
+
+/* Стили для элементов внутри visConfig, чтобы они вписались в Bootstrap */
+.vis-configuration-wrapper {
+  background: transparent !important;
+}
+
+/* Bootstrap override*/
+.form-label {
+  margin-bottom: 0rem;
+  font-weight: 700;
+}
+
+/* * {
+  border: 1px solid magenta;
+} */
