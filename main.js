@@ -203,9 +203,9 @@ createApp({
 
       network.on('stabilized', () => {
         // console.log('stabilized');
-        if (techTree.linksChanged) {
+        if (techTree.needLineUp) {
           lineUpUnusedNodes();
-          techTree.linksChanged = false;
+          techTree.needLineUp = false;
         }
       });
       // network.on('animationFinished', () => {
@@ -220,7 +220,7 @@ createApp({
       const unusedNodes = new Set();
       nodes.forEach((node) => {
         const links = node.from.size + node.to.size;
-        if (links) {
+        if (links || node.enabled) {
           const nodePos = network.getPosition(node.id);
           maxY = Math.max(nodePos.y, maxY);
         } else {

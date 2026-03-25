@@ -9,7 +9,7 @@ export default class TechTree {
     this.edges = edges;
     // this.nodes.on('update', (event, properties, senderId) => this._onNodesChange(event, properties, senderId));
     this.edges.on('*', (event, properties, senderId) => this._onEdgesChange(event, properties, senderId));
-    this.linksChanged = false;
+    this.needLineUp = false;
     this.issues = issues;
   }
 
@@ -65,7 +65,7 @@ export default class TechTree {
         node[key][method](targetId);
       }
     }
-    this.linksChanged = true;
+    this.needLineUp = true;
   }
 
   _updateTechPreqFromEdge(event, edge) {
@@ -310,8 +310,8 @@ export default class TechTree {
 
       // Случай 1: Абсолютно одинокий узел
       if (parentIds.length === 0 && childIds.length === 0) {
-        memo.set(nodeId, 0);
-        return 0;
+        memo.set(nodeId, 1);
+        return 1;
       }
 
       // Случай 2: Корень (есть дети, нет родителей)
@@ -335,13 +335,15 @@ export default class TechTree {
     let count = 0;
     allNodes.forEach((node) => {
       const links = node.from.size + node.to.size;
-      node.level = links ? getLevel(node.id) : ++count;
-      node.physics = Boolean(links);
+      const newPhysics = Boolean(links) || node.enabled;
+      node.level = newPhysics ? getLevel(node.id) : ++count;
+      if (node.physics !== newPhysics) {
+        node.physics = newPhysics;
+        this.needLineUp = true;
+      }
     });
 
   }
-
-
 
   /**
    * @param {any[]} techs
