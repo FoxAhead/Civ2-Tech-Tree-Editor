@@ -283,7 +283,7 @@ createApp({
     };
     const loadDefaultRules = async () => {
       try {
-        const newRulesTxt = await RulesTxt.loadFromFile('RULES.TXT');
+        const newRulesTxt = await RulesTxt.loadFromFile('RULES.TXT', ['@CIVILIZE']);
         rulesTxt = newRulesTxt;
         errorMessage.value = '';
         getAndRenderTechsFromRulesTxt();
@@ -295,7 +295,7 @@ createApp({
     // Custom RULES.TXT
     const loadCustomRulesTxt = async (file) => {
       try {
-        const newRulesTxt = await RulesTxt.loadFromFile(file);
+        const newRulesTxt = await RulesTxt.loadFromFile(file, ['@CIVILIZE']);
         currentFileName.value = newRulesTxt.currentFileName;
         rulesTxt = newRulesTxt;
         errorMessage.value = '';

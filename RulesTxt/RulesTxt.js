@@ -80,10 +80,12 @@ export class RulesTxt {
   #parts = [];
   #sectionsMap = new Map();
   #lineSeparator = '\n';
+  #enabledSections = [];
   currentFileName = '';
 
-  constructor(text, fileName = '') {
+  constructor(text, fileName = '', enabledSections = []) {
     this.currentFileName = fileName;
+    this.#enabledSections = enabledSections.map(s => s.toUpperCase());
     const match = text.match(/\r?\n/);
     this.#lineSeparator = match ? match[0] : '\n';
     this.#parseToParts(text);
@@ -92,7 +94,7 @@ export class RulesTxt {
   /**
    * Factory method to load and initialize RulesTxt
    */
-  static async loadFromFile(source) {
+  static async loadFromFile(source, enabledSections = Object.keys(SECTION_CONFIGS)) {
     let buffer, name;
     if (typeof source === 'string') {
       const response = await fetch(source);
@@ -105,7 +107,7 @@ export class RulesTxt {
     const ext = name.split('.').pop().toUpperCase();
     const encoding = langEncodings[ext] || 'windows-1252';
     const text = new TextDecoder(encoding).decode(buffer);
-    return new RulesTxt(text, name);
+    return new RulesTxt(text, name, enabledSections);
   }
 
   #parseToParts(text) {
@@ -140,9 +142,15 @@ export class RulesTxt {
       }
     }
     flush();
+    this.#enabledSections.forEach(section => {
+      if (!this.#sectionsMap.has(section)) {
+        throw new Error(`Required section ${section} not found in file ${this.currentFileName}`);
+      }
+    });
   }
 
   #processSectionData(part) {
+    if (!this.#enabledSections.includes(part.name)) return;
     const config = SECTION_CONFIGS[part.name];
     if (!config) return;
     const lines = part.lines;
@@ -242,7 +250,7 @@ export class RulesTxt {
   get terrainTypes() { return this.#sectionsMap.get('@TERRAIN')?.data || []; }
 
 
-  stringify(sectionsToUpdate = []) {
+  stringify(sectionsToUpdate = this.#enabledSections) {
     return this.#parts.map(p => {
       const shouldUpdate = sectionsToUpdate.includes(p.name);
       const content = p.getLines(this, shouldUpdate).join(this.#lineSeparator);
