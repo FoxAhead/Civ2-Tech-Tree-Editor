@@ -1,7 +1,7 @@
 export default class MultiSet {
   constructor() {
-    this._map = new Map(); // Храним: edgeId -> количество
-    this.size = 0;         // Общая сумма всех связей
+    this._map = new Map(); // Holding: Id -> Counter
+    this.size = 0;         // Total count
   }
   *[Symbol.iterator]() {
     yield* this._map.keys();

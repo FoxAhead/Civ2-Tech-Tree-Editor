@@ -1,0 +1,1361 @@
+;
+;   CIVILIZATION GAME DATA 8/6/98
+;   Copyright (c) 1999 by MicroProse Software
+;
+;   Game data for Over the Reich 
+;   A Multiplayer ToTPP scenario by John P. Petroski & Prof. Garfield
+;   2020
+;   
+;   
+;
+
+;
+;   Cosmic Principles
+;
+;   The following numbers control various key rules
+;   of the game.  GREAT discretion is advised if you
+;   opt to change these.  Values too far out of the
+;   expected range can cause the game to behave strangely.
+;   All values entered in rules.txt are bounded by +/-127. 
+;   However, this does not mean that all numbers within this 
+;   range will work properly, for example, unit costs must 
+;   not exceed 17.
+;
+@COSMIC
+1       ; Road movement multiplier
+2       ; 1 in x chance Trireme lost (mod. by Seafaring, Navigation)
+2       ; # of food each citizen eats per turn
+10      ; # of rows in food box (rows * city_size+1 = box)
+10      ; # of rows in shield box
+1       ; Settlers eat (govt <= Monarchy)
+2       ; Settlers eat (govt >= Communism)
+9       ; City size for first unhappiness at Chieftain level
+40      ; Riot factor based on # cities (higher factor lessens the effect)
+2       ; Aqueduct needed to exceed this size
+12      ; Sewer System needed to exceed this size
+70      ; Tech paradigm (higher # slows research)
+20      ; Base time for engineers to transform terrain (x2)
+3       ; Monarchy  pays support for all units past this (max 8)
+4       ; Communism pays support for all units past this (max 8)
+8       ; Fundamentalism pays support for all units past this (max 8)
+10       ; Communism is equivalent of this palace distance.
+50      ; Fundamentalism loses this % of science
+50      ; Percent shield penalty for production type change
+5       ; Max paradrop range
+75      ; Mass/Thrust paradigm (increasing slows spaceship time)
+5       ; Max effective science rate in fundamentalism (x10, so 5 = 50%)
+1	; Value of each citizen to the Civilization Score.
+20	; Value of each wonder to the Civilization Score.
+1	; Reward for landing on A. Centauri first = this multiplier*(# of habitats)*(prob. of success) 
+-10	; Cost to Civilization Score (+ or -) for each extant non-AI controlled polluted tile. 
+1	; For each turn of peace after turn 199, this amount *3 is added to Civilization Score.
+5	; Value to the Civilization Score of each future tech researched.
+0	; Penalty assessed to Civilization Score each time player betrays another race.
+0	; Cost to Civilization Score (+ or -) for each unit destroyed.
+11111111	; bitmask for goodie huts, right bit =map0, 0=no goodie huts
+0    ; Helicopters pick up huts 0=no 1=yes
+
+@COSMIC2
+TradeGoldMultiplier, 0
+TradeScienceMultiplier, 150
+ImpassableAir, 1
+TerrainDefenseForAir, 1
+CityPopulationLossAttack, 1
+CityPopulationLossCapture, 1
+UnitShieldColor, 28
+NoStackKills, 0
+EventHeapSize, 106480, 1
+NavigableRiversIntercardinal, 1
+NumberOfTerrainTypes, 16,16,16,16
+NoIncrementalRushBuy, 1
+MovementMultipliers, 1
+RailroadMultiplier, 1
+RiverMultiplier, 0
+AlpineMultiplier, 0
+ProductionCarryOver,1
+NumberOfUnitTypes, 127
+AICapitalizationLimit, 1200
+SDIDefense, 2
+
+
+;
+;   Civilization Advances
+;
+;   Ai Value, Civilized Modifier, Preq1, Preq2, Epoch, Category
+;
+;     Ai Value = Basic value at which computer players
+;                view this advance (used in determining
+;                which discovery to pursue, which to
+;                acquire during exchanges, and value of
+;                gift during diplomacy).
+;     Modifier = Modifier to value based on the "civilized"
+;                aspect of a leader's personality.  Positive
+;                values increase value for civilized leaders,
+;                decrease it for militaristic.  Negative
+;                values vice versa.
+;     preq1, preq2 = Prerequisites
+;
+;     Epoch = historical period
+;             0 = Ancient
+;             1 = Renaissance
+;             2 = Industrial Revolution
+;             3 = Modern
+;
+;     Category = Knowledge category
+;             0 = Military
+;             1 = Economic
+;             2 = Social
+;             3 = Academic
+;             4 = Applied
+;
+@CIVILIZE
+Interceptors I,           0, 0,  Cur, nil, 1, 0    ; AFl 0
+Interceptors II,          0, 0,  AFl, Eco, 1, 0    ; Alp 1
+Interceptors III,         0, 0,  Ato,  E1, 1, 0    ; Amp 2
+Escort Fighters I,        0, 0,  Cur, nil, 1, 0    ; Ast 3
+Escort Fighters II,       0, 0,  Ast, Eco, 1, 0    ; Ato 4
+Night Bombing I,          0, 0,  Cur, nil, 1, 1    ; Aut 5
+Escort Fighters III,      0, 0,  Ato,  E1, 1, 0    ; Ban 6
+NOT USED,                 0, 0,   no,  no, 0, 4    ; Bri 7
+Cadillac of the Skies,    0, 0,  Ban, Whe, 1, 0    ; Bro 8
+1940s Tech I,             0, 0,  nil, nil, 0, 4    ; Cer 9
+Bomber Destroyers I,      0, 0,  Cur, nil, 1, 0    ; Che 10
+Bomber Destroyers II,     0, 0,  Che, E1, 1, 0    ; Chi 11
+Interceptors IV,          0, 0,  Amp, Exp, 1, 0    ; CoL 12
+Night Fighters I,         0, 0,  Cur, nil, 1, 0    ; CA  13
+Night Fighters II,        0, 0,   CA, Csc, 1, 0    ; Cmb 14
+The Grand Alliance,       0, 0,  nil, nil, 2, 4    ; Cmn 15
+Night Fighters III,       0, 0,  Cmb, Cor, 1, 0    ; Cmp 16
+Advanced Radar I,         0, 0,  nil, nil, 3, 0    ; Csc 17
+NOT USED,                 0, 0,   no,  no, 0, 4    ; Cst 18
+Advanced Radar II,        0, 0,  Csc, Cmb, 3, 0    ; Cor 19
+Engines I,                0, 0,  nil, nil, 2, 1    ; Cur 20
+NOT USED,                 0, 0,   no,  no, 0, 4    ; Dem 21
+Engines II,               0, 0,  Cur,  X5, 2, 1    ; Eco 22
+Engines III,              0, 0,   SE,  X6, 2, 1    ; E1  23
+Night Bombing II,         0, 0,  Aut, Eco, 1, 1    ; E2  24
+Jabo I,                   0, 0,  Cur, nil, 1, 0    ; Eng 25
+Jabo II,                  0, 0,  Eng, Eco, 1, 0    ; Env 26
+Jabo III,                 0, 0,  Env,  E1, 1, 0    ; Esp 27
+Engines IV,               0, 0,   E1, Ban, 2, 1    ; Exp 28
+Experimental Design,      0, 0,   Stl, Ato, 1, 4   ; Feu 29
+Volksjäger,               0, 0,  Hor,  NF, 1, 3    ; Fli 30
+NOT USED,                 0, 0,   no,  no, 0, 4    ; Fun 31
+Centrifugal-Flow Engine,  0, 0,  Inv, nil, 1, 3    ; FP  32
+Axial-Flow Compressor,    0, 0,   Nav, nil, 1, 3    ; Gen 33
+NOT USED,                 0, 0,   no,  no, 0, 4    ; Gue 34
+NOT USED,                 0, 0,   no,  no, 0, 4    ; Gun 35
+Jet Fighters,             0, 0,  Gen, nil, 1, 3    ; Hor 36
+The Third Reich,          0, 0,  nil, nil, 0, 0    ; Ind 37
+Jet Fighter Design,       0, 0,  Feu,  Tac, 1, 3    ; Inv 38
+Jet Bombers I,            0, 0,  Hor, nil, 1, 3    ; Iro 39
+Jet Bombers II,           0, 0,  Iro, Las, 1, 3    ; Lab 40
+Wunderwaffe Program,      0, 0,  Eco, nil, 1, 4    ; Las 41
+Pulse-Jet Engines,        0, 0,  Feu, Las, 1, 2    ; Ldr 42
+Vergeltungswaffen 1,      0, 0,  Ldr, nil, 0, 0    ; Lit 43
+Rocketry,                 0, 0,  Lit, nil, 1, 2    ; Too 44
+Vergeltungswaffen 2,      0, 0,  Too, nil, 0, 0    ; Mag 45
+Strategic Bombers I,      0, 0,  Cur, nil, 1, 1    ; Map 46
+Strategic Bombers II,     0, 0,  Map, Eco, 1, 1    ; Mas 47
+Strategic Bombers III,    0, 0,  Mas,  E1, 1, 1    ; MP  48
+Window,                   0, 0,  Mas, nil, 0, 2    ; Mat 49
+Tactical Bombers I,       0, 0,  Cur, nil, 1, 1    ; Med 50
+Tactical Bombers II,      0, 0,  Med, Eco, 1, 1    ; Met 51
+Tactical Bombers III,     0, 0,  Met,  E1, 1, 1    ; Min 52
+Rocket Fighters,          0, 0,  Too, Exp, 1, 2    ; Mob 53
+NOT USED,                 0, 0,   no,  no, 0, 4    ; Mon 54
+1940s Tech II,            0, 0,  nil, nil, 0, 4    ; MT  55
+1940s Tech III,           0, 0,  nil, nil, 0, 4    ; Mys 56
+Jet Fighter Focus,        0, 0,  FP,  nil, 1, 3    ; Nav 57
+Jägernotprogramm,         0, 0,  Las, nil, 2, 1    ; NF  58
+Wilde Sau,                0, 0,  Cmb, nil, 1, 0    ; NP  59
+Night Bombing III,        0, 0,   E2,  E1, 1, 1    ; Phi 60
+Industry I,               0, 0,  Ref, nil, 2, 0    ; Phy 61
+Industry II,              0, 0,  Phy, nil, 2, 0    ; Pla 62
+Industry III,             0, 0,  Pla, nil, 2, 0    ; Plu 63
+Fuel Production I,        0, 0,  Ref, nil, 2, 2    ; PT  64
+Fuel Production II,       0, 0,   PT, nil, 2, 2    ; Pot 65
+NOT USED,                 0, 0,   no,  no, 0, 4    ; Rad 66
+NOT USED,                 0, 0,   no,  no, 0, 4    ; RR  67
+Fuel Production III,      0, 0,  Pot, nil, 2, 2    ; Rec 68
+War Economy,              0, 0,  nil, nil, 2, 3    ; Ref 69
+Rationing,                0, 0,  no,   no, 2, 3    ; Rfg 70
+The Axis Powers,          0, 0,  nil, nil, 0, 0    ; Rep 71
+Jägerstab,                0, 0,  Plu, Rec, 2, 1    ; Rob 72
+Foggia Airfields,         0, 0,  nil, nil, 0, 1    ; Roc 73
+Operation Overlord Prep., 0, 0,  nil, nil, 3, 1    ; San 74
+Operation Neptune,        0, 0,  nil, nil, 3, 1    ; Sea 75
+Vistula-Oder Offensive,   0, 0,  nil, nil, 0, 3    ; SFl 76
+Tuskeegee Airmen,         0, 0,  Roc, Bro, 0, 1    ; Sth 77
+Mass-Production Focus,    0, 0,  Eco, X6, 0, 4    ; SE  78 
+High-Technology Focus,    0, 0,  Eco, X6, 3, 2    ; Stl 79 
+Argument for Jet Jabo,    0, 0,  Stl, Env, 1, 3    ; Sup 80 
+Jet Fighters Prioritized, 0, 0,  Sup,  X7, 1, 3    ; Tac 81
+1940s Tech IV,            0, 0,  nil, nil, 0, 4    ; The 82
+Proximity Fuses,          0, 0,  Cor, nil, 1, 4    ; ToG 83
+Aircraft Prototypes,      0, 0,  nil, nil, 0, 4    ; Tra 84
+--Search for Long-Range Fighter, 0, 0,  no,  no, 1, 0    ; Uni 85 SAVE
+--The Allison-Powered Mustang,   0, 0,  no,  no, 1, 0    ; War 86 SAVE
+Rolls-Royce Merlin 61 Refit,   0, 0,  X2,  nil, 0, 4    ; Whe 87
+Advanced Radar III,       0, 0,  Cor, Feu, 3, 0    ; Wri 88
+Delays,                   0, 0,  nil, nil, 0, 4    ; ... 89
+Tactics I,                0, 0,   Amp, Cmp, 1, 0    ; U1  90 ammo 4
+Tactics II,               0, 0,   Ban,  Esp, 1, 0    ; U2  91 ammo 5
+Tactics III,              0, 0,   U2,  nil, 1, 0    ; U3  92 ammo 6
+Roam at Will,             0, 0,  Bro, nil, 1, 0    ; X1  93
+Long-Range Escorts Needed,0, 0,  nil, nil, 1, 0    ; X2  94
+Albert Speer's Death,     0, 0,   no,  no, 0, 0    ; X3  95
+Political Support I,      0, 0,  nil, nil, 2, 1    ; X4  96
+Political Support II,     0, 0,  AFl, X4, 2, 1    ; X5  97
+Political Support III,    0, 0,  X5, Alp, 2, 1    ; X6  98
+Political Support IV,     0, 0,  X6, Sup, 2, 1    ; X7  99
+
+;
+; Above 11 tech slots (U1 to X8) allow you to define your own 
+; civilization advances if desired.  Supply the name, the AI 
+; value, and the prerequisites.
+;
+; Then use the "U1", "U2", etc. 
+; identifier to incorporate it into the tech chain as a
+; prerequisite for other techs, units, city improvements.
+;
+
+;
+;  City Improvements
+;
+;   cost(x10), upkeep, preq
+;
+@IMPROVE
+Nothing,                   1, 0,    nil, ; 0 Nothing
+Headquarters,              1, 0,    no, ; 1 Palace
+NOT USED,                  1, 1,     no, ; 2 Barracks
+Red Army,                  1, 0,    no, 00000011 ; 3 Granary
+Civilian Population I,    60, 1,    nil, 00000101; 4 Temple
+Fuel Refinery I,          60, 1,     PT, 00000101; 5 MarketPlace
+Aircraft Factory I,       60, 3,    Eco, 00000101; 6 Library
+Quartermaster,            45, 2,    Rep, 00000100; 7 Courthouse
+City I,                   0, 0,    no, 00000011; 8 City Walls 
+City II,                  0, 0,    no, 00000011; 9 Aqueduct 
+Fuel Refinery II,         60, 2,    Pot, 00000101; 10 Bank
+Civilian Population II,   60, 1,    nil, 00000101; 11 Cathedral
+Aircraft Factory II,      60, 9,     E1, 00000101; 12 University
+Critical Industry,        120,0,    nil, 00000101; 13 Mass Transit 00000101
+Civilian Population III,  60, 1,    nil, 00000101; 14 Colosseum
+Industry I,               60, 1,    Phy, 00000101; 15 Factory
+Industry II,              60, 6,    Pla, 00000101; 16 Manufacturing Plant
+Airbase,                   0, 5,    nil, 00000011; 17 SDI Defense
+15th Air Force,            1, 0,    no, 00000011; 18 Recycling Center
+OLD Industry III,         60, 3,    no, ; 19 Power Plant
+NOT USED,                  1, 1,     no, ; 20 Hydro Plant
+NOT USED,                  1, 1,     no, ; 21 Nuclear Plant
+Fuel Refinery III,        60, 3,    Rec, 00000101; 22 Stock Exchange
+City III,                 0, 6,    no, 00000011; 23 Sewer System 
+Rationing,                 5, 1,    no, 00000100; 24 Supermarket
+Railyards,                60, 1,    nil, 00000101; 25 Superhighways
+Aircraft Factory III,     60, 15,    Feu, 00000101; 26 Research Lab
+Experimental Aircraft,    127, 6,    nil, 00000101; 27 SAM Missile Battery
+Firefighters,             5, 1,     nil, 00000100; 28 Coastal Fortress
+Industry III,             60, 9,    Plu, 00000101; 29 Solar Plant
+Docks,                    15, 1,     no, 00000101; 30 Harbor
+NOT USED,                  1, 1,     no, ; 31 Offshore Platform
+Jagdfliegerschule,       99, 63,    Rep, 00000100; 32 Airport
+Wehrmacht,                 5, 3,    no, 00000101; 33 Police Station
+Military Port,            60, 1,    nil, 00000101; 34 Port Facility
+NOT USED,                  1, 1,     no,  00000100; 35 Transporter
+NOT USED,                  1, 1,     no, ; 36 SS Structural
+NOT USED,                  1, 1,     no, ; 37 SS Component
+NOT USED,                  1, 1,     no, ; 38 SS Module
+(Stockpile Fuel),         60, 0,     no, ; 39 Capitalization
+NOT USED,                  1, 1,     no, ; 0 WOW - Pyramids
+NOT USED,                  1, 1,     no, ; 1 WOW - Hanging Gardens
+I.G. Farben,              15, 0,    nil, ; 2 WOW - Colossus
+NOT USED,                  1, 1,     no, ; 3 WOW - Lighthouse
+NOT USED,                  1, 1,     no, ; 4 WOW - Great Library
+NOT USED,                  1, 1,     no, ; 5 WOW - Oracle
+NOT USED,                  1, 1,     no, ; 6 WOW - Great Wall
+NOT USED,                  1, 1,     no, ; 7 WOW - Sun Tzu's War Academy
+Krupp Works,              15, 0,    nil, ; 8 WOW - King Richard's Crusade
+NOT USED,                  1, 1,     no, ; 9 WOW - Marco Polo's Embassy
+NOT USED,                  1, 1,     no, ; 10 WOW - Michelangelo's Chapel
+Peenemünde,               15, 0,    nil, ; 11 WOW - Copernicus' Observatory
+NOT USED,                  1, 1,     no, ; 12 WOW - Magellan's Expedition
+NOT USED,                  1, 1,     no, ; 13 WOW - Shakespeare's Theatre
+NOT USED,                  1, 1,     no, ; 14 WOW - Leonardo's Workshop
+Adolf Hitler,              1, 1,     nil, ; 15 WOW - J.S. Bach's Cathedral
+Jägernotprogramm,         80, 0,     NF, ; 16 WOW - Isaac Newton's College
+Albert Speer's Reforms,   80, 0,    Rob, ; 17 WOW - Adam Smith's Trading Co.
+56th Fighter Group,        1, 1,    Cmn, ; 18 WOW - Darwin's Voyage
+No.617 RAF,               60, 0,     no, ; 19 WOW - Statue of Liberty **
+JG2 Richthofen,            1, 1,    nil, ; 20 WOW - Eiffel Tower
+NOT USED,                  1, 1,     no, ; 21 WOW - Women's Suffrage
+Arsenal of Democracy,     60, 0,    Cmn, ; 22 WOW - Hoover Dam
+NOT USED,                  1, 1,     no, ; 23 WOW - Manhattan Project
+JG26 Schlageter,          60, 0,    nil, ; 24 WOW - United Nations
+NOT USED,                  1, 1,     no, ; 25 WOW - Apollo Program
+NOT USED,                  1, 1,     no, ; 26 WOW - SETI Program
+NOT USED,                  1, 1,     no, ; 27 WOW - Cure for Cancer
+
+;
+; Expiration advancements for Wonders of the World
+;
+@ENDWONDER
+nil,        ; Pyramids
+nil,        ; Hanging Gardens
+nil,        ; Colossus
+nil,        ; Lighthouse
+nil,        ; Great Library
+nil,        ; Oracle
+nil,        ; Great Wall
+nil,        ; Sun Tzu's War Academy
+nil,        ; King Richard's Crusade
+nil,        ; Marco Polo's Embassy
+nil,        ; Michelangelo
+nil,        ; Copernicus
+nil,        ; Magellan
+nil,        ; Shakespeare
+nil,        ; Da Vinci's Workshop
+nil,        ; Bach Sea
+nil,        ; Newton
+X3,         ; Smith's Trading Co.
+nil,        ; Darwin
+Rep,        ; Statue of Liberty
+nil,        ; Eiffel Tower
+nil,        ; Women's Suffrage
+nil,        ; Hoover Dam
+nil,        ; Manhattan Project
+nil,        ; United Nations
+nil,        ; Apollo
+nil,        ; SETI
+nil,        ; Cure for Cancer
+
+
+;
+;    Unit Types
+;
+; until, domain,  move,rng,  att,def  hit,firepwr  cost,hold,  role, preq,  flags
+;
+; until       = Civ advance which renders unit obsolete
+; Move        = Movement rate (spaces per turn)
+; Range       = # of turns fuel carried (0 for non-air units)
+;
+; domain      = Movement domain of unit
+:               0 = Ground
+;               1 = Air
+;               2 = Sea
+;
+; att         = Attack factor (chance to score hit attacking)
+; def         = Defense factor (chance to score hit defending)
+; hit         = Hit points (damage x10 which can be taken before elimination)
+; firepwr     = # damage points caused per hit scored on enemy.
+;
+; cost        = Cost (# of shield rows, usually of 10 shields each)
+; hold        = # of holds on ship (for carrying units)
+;
+; role        = AI role (Generally affects the way in
+;               which computer players use the unit, but
+;               roles >= 5 will actually affect abilities
+;               of the unit)
+;               0 = Attack
+;               1 = Defend
+;               2 = Naval Superiority
+;               3 = Air Superiority
+;               4 = Sea Transport
+;               5 = Settle
+;               6 = Diplomacy
+;               7 = Trade
+;
+; preq        = Prerequisite advance
+;
+; "Flags" control special advantages & restrictions.  Not
+; all of these flags "make sense" for all types of units
+; (paradropping ships, for instance).  Nonsensical variations
+; may produce bizarre effects (or worse).  You were warned.
+;
+;   000000000000001 = Two space visibility
+;   000000000000010 = Ignore zones of control
+;   000000000000100 = Can make amphibious assaults
+;   000000000001000 = Submarine advantages/disadvantages
+;   000000000010000 = Can attack air units (fighter)
+;   000000000100000 = Ship must stay near land (trireme)
+;   000000001000000 = Negates city walls (howitzer)
+;   000000010000000 = Can carry air units (carrier)
+;   000000100000000 = Can make paradrops
+;   000001000000000 = Alpine (treats all squares as road)
+;   000010000000000 = x2 on defense versus horse (pikemen)
+;   000100000000000 = Free support for fundamentalism (fanatics)
+;   001000000000000 = Destroyed after attacking (missiles)
+;   010000000000000 = x2 on defense versus air (AEGIS)
+;   100000000000000 = Unit can spot submarines
+;
+;
+@UNITS
+Red Army Group,       nil, 0,  8.,0, 50a,50d, 2h,2f, 127,0,  1, nil, 000000001000100 ;0 
+Construction Team,    nil, 0,  4.,0,  0a,2d,  2h,2f, 20,0,  5, nil, 000000000000010 ;1
+Bofors 40mm,          nil, 0,   2.,0,  0a,5d, 3h,2f, 25,0,  1, nil, 010000000000000 ;2
+Early Radar,          nil, 0,  1.,0,  0a,15d, 2h,2f, 30,0,  1, nil, 000000100000000 ;3
+Advanced Radar,       nil, 0,  1.,0,  0a,15d, 2h,2f, 45,0,  1, Cor, 000000100000000 ;4
+Fw200,                nil, 1,  60.,4,  0a,6d, 2h,2f, 60,0,  0, Mas, 100000000001000 ;5
+Freight Train,        nil, 0, 12.,0,  0a,2d,  2h,2f, 60,0,  1, nil, 000000000000000 ;6
+Railyard,             nil, 0,  0.,0,  0a,18d, 3h,2f,  2,0,  7, nil, 000000000000000 ;7
+Aerial Photos,        nil, 0,  1.,0,  0a,1d,  1h,1f,  2,0,  6, nil, 000000000000000 ;8
+Sdkfz 7/2,            nil, 0,  8.,0,  0a,4d,  2h,2f, 40,0,  1, nil, 010000000000000 ;9
+88mm Flak Battery,    nil, 0,  4.,0,  0a,5d,  3h,2f,  50,0,  1, nil, 010000000000000 ;10
+Flak Train,           nil, 0, 10.,0,  0a,7d,  3h,2f, 50,0,  1, nil, 010000000000000 ;11
+Me109G6,              Ato, 1, 20.,4,  0a,8d,  2h,2f, 40,0,  3, Ast, 000000000001000 ;12
+Me109G14,             Ban, 1, 22.,4,  0a,9d,  2h,2f, 40,0,  3, Ato, 000000000001000 ;13
+Me109K4,              nil, 1, 24.,4,  0a,10d, 2h,2f, 40,0,  3, Ban, 000000000001000 ;14
+Fw190A5,              Amp, 1, 30.,4,  0a,6d,  2h,2f, 45,0,  3, AFl, 000000000001000 ;15
+Fw190A8,              nil, 1, 32.,4,  0a,4d,  2h,2f, 65,0,  3, Alp, 000000000001000 ;16
+Fw190D9,              CoL, 1, 34.,4,  0a,7d,  2h,2f, 45,0,  3, Amp, 000000000001000 ;17
+Ta152,                nil, 1, 40.,4,  0a,9d,  2h,2f, 50,0,  3, CoL, 000000000001000 ;18
+Military Port,        nil, 0,  0.,0,  0a,18d, 3h,2f,  2,0,  7, nil, 000000000000000 ;19
+Me110,                Chi, 1, 16.,6,  0a,6d, 2h,2f, 40,0,  3, Che, 000000000001000 ;20
+Me410,                nil, 1, 18.,6,  0a,7d, 2h,2f, 40,0,  3, Chi, 000000000001000 ;21
+Ju88C,                Cmb, 1, 22.,6,  0a,6d,  2h,2f, 40,0,  3,  CA, 000000000001000 ;22
+Ju88G,                Cmp, 1, 24.,6,  0a,7d,  2h,2f, 40,0,  3, Cmb, 000000000001000 ;23
+He219,                nil, 1, 28.,6,  0a,8d,  2h,2f, 40,0,  3, Cmp, 000000000001001 ;24
+He162,                nil, 1, 40.,2, 0a,2d,   2h,2f, 90,0,  3, Fli, 000000000011000 ;25
+Me163,                nil, 1, 20.,1, 0a,2d,   2h,2f, 75,0,  3, Mob, 000000000001000 ;26
+Me262,                nil, 1, 80.,2, 0a,5d,  2h,2f, 127,0,  3, Hor, 000000000001000 ;27
+Ju87G,                nil, 1, 15.,4,  0a,2d,  2h,2f, 20,0,  0, Eng, 000000000001000 ;28
+Fw190F8,              Esp, 1, 20.,4,  0a,8d,  2h,2f, 25,0,  0, Env, 000000000001000 ;29
+Do335,                nil, 1, 25.,4,  0a,7d,  2h,2f, 30,0,  0, Esp, 000000000001000 ;30
+Do217,                 MP, 1, 20.,12, 0a,7d,  2h,2f, 35,0,  0, Mas, 000000000001000 ;31
+He277,                nil, 1, 23.,12, 0a,8d,  2h,2f, 40,0,  0,  MP, 000000000001000 ;32
+Arado234,             nil, 1, 60.,2, 0a,2d,  2h,2f,  90,0,  0, Iro, 000000000001000 ;33
+Go229,                nil, 1,127.,2, 0a,2d,  2h,2f, 120,0,  0, Lab, 000000000001000 ;34
+Spitfire IX,          Ato, 1, 20.,3,  0a,7d,  2h,2f, 20,0,  3, nil, 100000000000000 ;35
+Spitfire XII,         Ban, 1, 22.,3,  0a,8d,  2h,2f, 20,0,  3, Ato, 100000000000000 ;36
+Spitfire XIV,         nil, 1, 24.,3,  0a,9d,  2h,2f, 20,0,  3, Ban, 100000000000000 ;37
+Hurricane IV,         nil, 1, 15.,4,  0a,5d,  2h,2f, 20,0,  0, Eng, 100000000000000 ;38
+Typhoon,              Esp, 1, 20.,4,  0a,7d,  2h,2f, 30,0,  0, Env, 100000000000000 ;39
+Tempest,              nil, 1, 25.,4,  0a,9d,  2h,2f, 30,0,  0, Esp, 100000000000000 ;40
+Meteor,               nil, 1, 80.,2, 0a,2d,  2h,2f, 120,0,  3, Hor, 100000000010000 ;41
+Beaufighter,          nil, 1, 40.,6,  0a,6d,  2h,2f, 30,0,  3, CA,  000000000001000 ;42
+Mosquito NF Mk II,    nil, 1, 40.,8,  0a,7d,  2h,2f, 35,0,  3, Cmb, 000000000001000 ;43
+Mosquito NF Mk XIII,  nil, 1, 45.,8,  0a,8d,  2h,2f, 45,0,  3, Cmp, 100000000001000 ;44
+Industry I,           nil, 0,  0.,0,  0a,20d, 3h,2f,  2,0,  7, nil, 000000000000000 ;45
+Industry II,          nil, 0,  0.,0,  0a,20d, 3h,2f,  2,0,  7, nil, 000000000000000 ;46
+Industry III,         nil, 0,  0.,0,  0a,20d, 3h,2f,  2,0,  7, nil, 000000000000000 ;47
+Depth Charge,         nil, 1,   1.,1,  7a,1d,  1h,4f,  1,0,  0, nil,  001000000000000 ;48
+Barrage Balloons,      nil,  0,  1.,0,  0a,20d,  2h,2f, 3,0,  1, nil, 000000100000000 ;49
+P-47D11,              Ato, 1,  30.,3, 0a,8d,  2h,2f, 30,0,  3, Ast, 100000000000000 ;50
+P-47D25,              Bro, 1,  34.,3, 0a,9d,  2h,2f, 30,0,  3, Ato, 100000000000000 ;51
+P-47D40,              nil, 1,  34.,4, 0a,10d,  2h,2f, 30,0,  3, Ban, 100000000000000 ;52
+Experten,             nil, 1, 36.,4,  0a,11d,  2h,2f, 35,0,  3, nil, 100000000001001 ;53
+P-38H,                Alp, 1,  30.,4, 0a,6d,  2h,2f, 35,0,  3, AFl, 100000000000000 ;54
+P-38J,                Amp, 1,  34.,4, 0a,7d,  2h,2f, 35,0,  3, Alp, 100000000000000 ;55
+P-51B,                X1,  1,  40.,6, 0a,11d, 2h,2f, 45,0,  3, Bro, 100000000000000 ;56
+P-51D,                nil, 1,  40.,8, 0a,12d, 2h,2f, 45,0,  3,  X1, 100000000000001 ;57
+P-80,                 nil, 1,  80.,2,  0a,2d, 2h,2f, 120,0, 3, Hor, 100000000010000 ;58
+Stirling,             E2, 1,  20.,10, 0a,6d, 3h,2f, 20,0,  0, Aut, 000000000001000 ;59
+Halifax,               Phi, 1,  22.,12, 0a,7d, 3h,2f, 20,0,  0, E2, 000000000001000 ;60
+Lancaster,            nil, 1,  25.,12, 0a,8d, 3h,2f, 20,0,  0,  Phi, 000000000001000 ;61
+Pathfinder,           nil, 1,  26.,12, 0a,9d, 2h,2f, 60,0,  0, Mat, 000000000001001 ;62
+A-20,                 Met, 1,  35.,4,  0a,5d, 2h,2f, 30,0,  0, Med, 100000000000000 ;63
+B-26,                 Min, 1,  40.,4,  0a,6d, 2h,2f, 30,0,  0, Met, 100000000000000 ;64
+A-26,                 nil, 1,  45.,4,  0a,7d, 2h,2f, 30,0,  0, Min, 100000000000000 ;65
+B-17F,                MP, 1,  20.,12, 0a,7d, 2h,2f, 20,0,  0, Map,  100000000000000 ;66
+B-24J,                nil, 1,  30.,12, 0a,6d, 2h,2f, 20,0,  0, Mas, 100000000000000 ;67
+B-17G,                nil, 1,  22.,12, 0a,8d, 2h,2f, 20,0,  0,  MP, 100000000000000 ;68
+Battle Group,           nil, 0,   4.,0, 45a,45d, 2h,2f, 127,0,  1, nil, 000000001000100 ;69
+Depleted Battle Group,  nil, 0,   6.,0, 30a,30d, 2h,2f, 127,0,  0, nil, 000000001000100 ;70
+Egon Mayer,             nil, 1, 36.,4,  0a,14d,  2h,2f, 35,0,  3, nil, 100000000001001 ;71
+3.7-inch Flak,        nil, 0,   4.,0, 0a,7d, 3h,2f, 50,0,  1, nil, 010000000000000 ;72
+He111,                Mas, 1, 18.,10,  0a,6d, 2h,2f, 30,0,  0, Map, 000000000000000 ;73
+Battle Group,           nil, 0,   10.,0, 50a,50d, 2h,2f, 127,0,  1, nil, 000000001000100 ;74
+Depleted Battle Group,  nil, 0,   6.,0, 30a,30d, 2h,2f,  127,0,  0, nil, 000000001000100 ;75
+Sunderland,           nil, 1,  60.,4,  0a,6d, 2h,2f, 60,0,  0, Mas, 100000000001000 ;76
+Heavy Guns,        nil, 1,   1.,1,  7a,1d,  1h,3f,  1,0,  0, nil,  001000000010000 ;77
+Hermann Graf,         nil, 1, 36.,4,  0a,25d,  2h,2f, 35,0,  3, nil, 100000000001001 ;78
+Josef Priller,        nil, 1, 50.,4,  0a,14d,  2h,2f, 35,0,  3, nil, 100000000001001 ;79
+Adolf Galland,        nil, 1, 80.,2, 0a,14d,  2h,2f, 120,0,  3, nil, 100000000001001 ;80
+Task Force (G),       nil, 2,   12.,0, 8a,8d, 3h,2f, 90,2,  4, nil, 010000000000000 ;81
+Task Force (A),       nil, 2,   12.,0, 8a,8d, 3h,2f, 90,2,  4, nil, 110000000000000 ;82
+332nd FG,             nil, 1,  26.,4, 0a,13d, 2h,2f, 50,0,  3, Sth, 100000000000001 ;83
+15th AF Bombers,      nil, 1,  16.,9,  0a,5d, 2h,2f, 20,0,  0, Roc, 100000000000000 ;84
+Aircraft Factory I,   nil, 0,   0.,0, 0a,18d, 3h,2f,  2,0,  7, nil, 000000000000000 ;85
+Aircraft Factory II,  nil, 0,   0.,0, 0a,18d, 3h,2f,  2,0,  7, nil, 000000000000000 ;86
+Aircraft Factory III, nil, 0,   0.,0, 0a,18d, 3h,2f,  2,0,  7, nil, 000000000000000 ;87
+Refinery I,           nil, 0,   0.,0, 0a,18d, 3h,2f,  2,0,  7, nil, 000000000000000 ;88
+Refinery II,          nil, 0,   0.,0, 0a,18d, 3h,2f,  2,0,  7, nil, 000000000000000 ;89
+Refinery III,         nil, 0,   0.,0, 0a,18d, 3h,2f,  2,0,  7, nil, 000000000000000 ;90
+Urban Center I,       nil, 0,   0.,0, 0a,18d, 3h,2f,  2,0,  7, nil, 000000000000000 ;91
+Urban Center II,      nil, 0,   0.,0, 0a,18d, 3h,2f,  2,0,  7, nil, 000000000000000 ;92
+Urban Center III,     nil, 0,   0.,0, 0a,18d, 3h,2f,  2,0,  7,  nil, 000000000000000 ;93
+Gun Battery,          nil, 0,   2.,0, 0a,10d, 3h,2f, 60,0, 1, nil,  010000000000000 ;94
+Light Guns,           nil, 1,   1.,1,  4a,1d,  1h,3f,  1,0,  0, nil,  001000000010000 ;95
+Medium Guns,          nil, 1,   1.,1,  5a,1d,  1h,3f,  1,0,  0, nil,  001000000010000 ;96
+Jet Guns,           nil, 1,   1.,1,  6a,1d,  1h,3f,  1,0,  0, nil,  001000000010000 ;97
+250lb Bomb,           nil, 1,   1.,1,  7a,1d,  1h,4f,  1,0,  0, nil,  001000000000000 ;98
+500lb Bomb,           nil, 1,   1.,1,  8a,1d,  1h,4f,  1,0,  0, nil,  001000000000000 ;99
+1000lb Bomb,          nil, 1,   1.,1, 12a,1d,  1h,4f,  1,0,  0, nil,  001000000000000 ;100
+Window,               nil, 1,   2.,2,  0a,1d,  1h,1f,  1,0,  0, nil,  000000000000000 ;101
+H.W. Schnaufer,       nil, 1, 36.,4,  0a,14d,  2h,2f, 60,0,  3, Cmp,  100000000001001 ;102
+A2A Rockets,          nil, 1,   1.,1,  5a,1d,  1h,9f,  1,0,  0, nil,  001000000010000 ;103
+Panzer Division,      nil, 0,   8.,0, 50a,50d,  2h,2f,  1,0,  0, nil,  000000001000010 ;104
+Damaged B-17F,        nil, 1,  15.,10, 0a,4d, 2h,2f, 10,0,  0,  nil, 100000000000000 ;105
+Neutral Territory,    nil, 1,   0.,0,  0a,99d, 9h,9f,  1,0,  0, no,  1000000000000000 ;106
+Damaged B-17G,        nil, 1,  16.,10, 0a,5d, 2h,2f, 10,0,  0,  nil, 100000000000000 ;107
+P-38L,                nil, 1,  38.,4, 0a,8d,  2h,2f, 35,0,  3, Amp, 100000000000000 ;108 
+Critical Industry,    nil, 0,   0.,0, 0a,25d, 6h,2f,  2,0,  7, nil, 000000000000000 ;109 
+Torpedo,              nil, 1,   1.,0,  8a,1d,  1h,4f,  1,0,  0, nil,  001000000000000 ;110
+Aircraft Carrier,     nil, 2,   8.,0,  0a,5d,  3h,2f, 120,0,  2, nil,  010000010000000 ;111
+USAAF Ace,            nil, 1, 40.,8,  0a,14d,  2h,2f, 35,0,  3, nil, 100000000000001 ;112
+RAF Ace,              nil, 1, 25.,4,  0a,14d,  2h,2f, 35,0,  3, nil, 100000000000001 ;113
+Barrage,   	      nil, 1,   3.,1,  25a,1d,  1h,6f,  1,0,  0, nil,  001000000000000 ;114
+Convoy,               nil, 2,   8.,0,  2a,4d, 3h,2f, 10,0,  1, nil,  010000000001000 ;115
+Light Flak,           nil, 1,   2.,1,  6a,1d,  1h,4f,  1,0,  0, nil,  001000000010000 ;116
+Yak-3,                nil, 1,  16.,4,  0a,9d,  2h,2f, 30,0,  3, SFl, 100000000000000 ;117
+Il-2,                 nil, 1,  16.,4,  0a,8d,  4h,2f, 30,0,  0, SFl, 100000000000000 ;118
+3.7cm Flak,           nil, 0,   2.,0,  0a,5d,  3h,2f, 25,0,  1, nil, 010000000000000 ;119
+Ju-188 (PR),          nil, 1,  80.,4,  0a,5d,  2h,2f, 60,0,  0, nil, 000000000000000 ;120
+V1 Launch Site,       nil, 0,   4.,0,  0a,10d, 2h,2f, 90,0,  1, Lit, 000000000001000 ;121
+V2 Launch Site,       nil, 0,  4.,0,  0a,10d, 2h,2f, 120,0,  1, Mag, 000000000001000 ;122
+V1 Buzzbomb,          nil, 1,  10.,6,  7a,1d,  1h,9f,  1,0,  0, nil,  001000000000000 ;123
+V2 Rocket,            nil, 1,  60.,1,  10a,1d,  1h,9f,  1,0,  0, nil,  001000000000000 ;124
+Mosquito (PR),        nil, 1,  80.,4,  0a,5d,  2h,2f, 60,0,  0, nil, 100000000000000 ;125
+Wolf Pack,            nil, 2,  10.,0,  0a,2d,  2h,2f,  90,0,  2, Rep,  110000000001000 ;126
+
+;
+; Note: the above 11 unit types (extra land, ship, air, and test units) are 
+; available for user defined unit types.  If these units are given prerequisites
+; other than "no" they will appear in the game when the specified
+; technology is reached.  Use if you want to create your own unit types
+; without sacrificing any of the predefined units.  Be sure to define
+; the "role" field accurately, so that the computer will understand how
+; to make use of the new units in its own civilizations.
+;
+; There is no requirement that the extra units be used to
+; create exactly one of each type; you could create three
+; ground units.  But the icons provided are for one of each.
+; The 11 extra unit types have default icons provided by the game.
+; To actually change the icons is a somewhat more difficult
+; task.  The icons are stored in "UNITS.GIF".
+;
+; Sound effects for these 11 units may be added by providing
+; CUSTOM1.WAV, CUSTOM2.WAV, and CUSTOM3.WAV for the extra units and
+: Extra1.wav through extra8.wav for the 8 test units.  These should be
+; 8-bit, mono, and sampled at 22050hz.
+;
+; Ideas:
+;
+; Hovercraft,   nil, 2,  8.,0,  0a,1d,  2h,2f,  7,1,  4, MP,  000000000000000
+;
+
+
+;
+;  Terrain
+;
+;  Movecost, defense,   food, shields, trade,
+;        . . .  Irrigate, bonus, #turns, ai-irrigate,
+;        . . .  Mine,     bonus, #turns, ai-mine
+;        . . .  Transform
+;
+;   defense = multiply by 50% to get % of normal combat factor defended at.
+;       (so 3 x 50% = 150%, meaning a strength 2 unit defends at 3).
+;
+;  Irrigate/Mine = yes, no, or type of terrain changed to
+;  Transform     = Terrain type engineers can transform to
+;
+;  bonus = # extra production from that change
+;
+;  turns = # turns for settler to make change
+;
+;  ai    = Minimum govt level necessary for
+;          computer player to want to perform irrigate/mine
+;        0 Never
+;        1 Despotism
+;        2 Monarchy
+;        3 Communism
+;        4 Fundamentalism
+;        5 Republic
+;        6 Democracy
+;
+@TERRAIN
+City,            1,2,  8,6,0,    no, 0, 1, 1,   no, 0, 1,  1,  no,   no, ; Drt 0
+Railtrack,       1,1,  1,1,0,    no, 0, 1, 1,   no, 0, 1,  1,  no,   no, ; Pln 1
+Grassland,       1,2,  2,0,0,    yes, 3, 1, 1,  Gla, 1, 2,  1,  no,  yes, ; Grs 2
+Forest,          3,2,  1,0,0,    no, 0, 1, 1,   no, 0, 1,  1,  no,  yes, ; For 3
+Urban,           1,2,  2,2,0,    no, 0, 1, 1,   no, 0, 1,  1,  no,   no, ; Hil 4
+Hills,           4,2,  1,0,0,    no, 0, 1, 1,   no, 0, 1,  1,  no,  yes, ; Mou 5
+Refinery,        1,2,  2,0,40,   no, 0, 1, 1,   no, 0, 1,  1,  no,   no, ; Tun 6
+Installation,    1,2,  0,0,0,    no, 0, 1, 1,   no, 0, 1,  1,  no,  yes, ; Gla 7
+Industry,        1,2,  2,20,0,   no, 0, 1, 1,   no, 0, 1,  1,  no,   no, ; Swa 8
+Airfield,        1,2,  4,4,0,    no, 0, 1, 1,   no, 0, 1,  1,  no,   no, ; Jun 9
+Water,           1,2,  3,0,0,    no, 0, 1, 1,   no, 0, 1,  1,  no,   no, ; Oce 10
+Bombed RR,       2,2,  0,0,0,    no, 0, 1, 1,   no, 0, 1,  1,  no,  yes, ; Bbb 11
+Bombed Refinery, 2,2,  0,0,0,    no, 0, 1, 1,   no, 0, 1,  1,  no,  no, ; Ccc 12
+Bombed Urban,    2,2,  0,0,0,    no, 0, 1, 1,   no, 0, 1,  1,  no,  no, ; Ddd 13
+Bombed Industry, 2,2,  0,0,0,    no, 0, 1, 1,   no, 0, 1,  1,  no,  no, ; Eee 14
+Other Theatre,   2,2,  4,4,0,    no, 0, 1, 1,   no, 0, 1,  1,  no,  yes, ; Fff 15
+City,            1,2,  8,6,0,
+Railtrack,       1,2,  1,1,0,
+Grassland,       1,2,  2,0,0,
+Lumber,          3,2,  1,1,0,
+Urban,           1,2,  2,2,0,
+Coal,            4,2,  1,2,0,
+Refinery,        1,2,  2,0,40,
+Installation,    1,2,  0,0,0,
+Assembly Line,   1,2,  2,25,0,
+Airfield,        1,2,  4,4,0,
+Water,           1,2,  3,0,0,
+Bombed RR,       2,2,  0,0,0, ; Bbb1
+Bombed Refinery, 2,2,  0,0,0, ; Ccc1
+Bombed Urban,    2,2,  0,0,0, ; Ddd1
+Bombed Industry, 2,2,  0,0,0, ; Eee1
+Other Theatre,   2,2,  4,4,0, ; Fff1
+City,            1,2,  8,6,0,
+Railtrack,       1,2,  1,1,0,
+Grassland,       1,2,  2,0,0,
+Game,            3,2,  2,0,0,
+Urban,           1,2,  2,2,0,
+Iron,            4,2,  1,2,0,
+Refinery,        1,2,  2,0,40,
+Installation,    1,2,  0,0,0,
+Assembly Line,   1,2,  2,25,0,
+Airfield,        1,2,  4,4,0,
+Water,           1,2,  3,0,0,
+Bombed RR,       2,2,  0,0,0, ; Bbb1
+Bombed Refinery, 2,2,  0,0,0, ; Ccc1
+Bombed Urban,    2,2,  0,0,0, ; Ddd1
+Bombed Industry, 2,2,  0,0,0, ; Eee1
+Other Theatre,   2,2,  4,4,0, ; Fff1
+
+@TERRAIN1
+City,            1,2,  1,0,0,    no, 0, 1, 1,   no, 0, 1,  1,  no,  yes, ; Drt 0
+Hills,           1,2,  1,0,0,    no, 0, 1, 1,   no, 0, 1,  1,  no,  yes, ; Pln 1
+Grassland,       1,2,  1,0,0,    no, 0, 4, 1,   no, 0, 1,  1,  no,  yes, ; Grs 2
+Forest,          1,2,  1,0,0,    no, 0, 1, 1,   no, 0, 1,  1,  no,  yes, ; For 3
+Urban,           1,2,  1,0,0,    no, 0, 1, 1,   no, 0, 1,  1,  no,  yes, ; Hil 4
+Cloud Cover,     1,6,  1,0,0,    no, 0, 1, 1,   no, 0, 1,  1,  no,  yes, ; Mou 5
+Refinery,        1,2,  1,0,0,    no, 0, 1, 1,   no, 0, 1,  1,  no,  yes, ; Tun 6
+SAVE,            1,2,  1,0,0,    no, 0, 1, 1,   no, 0, 1,  1,  no,  yes, ; Gla 7
+Industry,        1,2,  1,0,0,    no, 0, 1, 1,   no, 0, 1,  1,  no,  yes, ; Swa 8
+Airfield,        1,2,  1,0,0,    no, 0, 1, 1,   no, 0, 1,  1,  no,   no, ; Jun 9
+Water,           1,2,  1,0,0,    no, 0, 1, 1,   no, 0, 1,  1,  no,   no, ; Oce 10
+Rubble,          1,2,  1,0,0,    no, 0, 1, 1,   no, 0, 1,  1,  no,   no, ; Bbb 11
+Bombed Refinery, 1,2,  1,0,0,    no, 0, 1, 1,   no, 0, 1,  1,  no,   no, ; Ccc 12
+Bombed RR,       1,2,  1,0,0,    no, 0, 1, 1,   no, 0, 1,  1,  no,   no, ; Ddd 13
+Bombed Industry, 1,2,  1,0,0,    no, 0, 1, 1,   no, 0, 1,  1,  no,   no, ; Eee 14
+Target,          1,2,  1,0,0,    no, 0, 1, 1,   no, 0, 1,  1,  no,   no, ; Fff 15
+Europe,          1,2,  0,0,0,
+Europe,          1,2,  0,0,0,
+Europe,          1,2,  0,0,0,
+Europe,          1,2,  0,0,0,
+Europe,          1,2,  0,0,0,
+Europe,          1,6,  0,0,0,
+Europe,          1,2,  0,0,0,
+Europe,          1,2,  0,0,0,
+Europe,          1,2,  0,0,0,
+Europe,          1,2,  0,0,0,
+Water,           1,2,  0,0,0,
+Europe,          1,2,  0,0,0, ; Bbb1
+Europe,          1,2,  0,0,0, ; Ccc1
+Europe,          1,2,  0,0,0, ; Ddd1
+Europe,          1,2,  0,0,0, ; Eee1
+Europe,          1,2,  0,0,0, ; Fff1
+Europe,          1,2,  0,0,0,
+Europe,          1,2,  0,0,0,
+Europe,          1,2,  0,0,0,
+Europe,          1,2,  0,0,0,
+Europe,          1,2,  0,0,0,
+Europe,          1,6,  0,0,0,
+Europe,          1,2,  0,0,0,
+Europe,          1,2,  0,0,0,
+Europe,          1,2,  0,0,0,
+Europe,          1,2,  0,0,0,
+Water,           1,2,  0,0,0,
+Europe,          1,2,  0,0,0, ; Bbb1
+Europe,          1,2,  0,0,0, ; Ccc1
+Europe,          1,2,  0,0,0, ; Ddd1
+Europe,          1,2,  0,0,0, ; Eee1
+Europe,          1,2,  0,0,0, ; Fff1
+
+@TERRAIN2
+City,            1,2,  1,0,0,    no, 0, 1, 1,   no, 0, 1,  1,  no,   no, ; Drt 0
+Railtrack,       1,2,  1,1,0,    no, 0, 1, 1,   no, 0, 1,  1,  no,   no, ; Pln 1
+Grassland,       1,2,  2,0,0,   Jun, 1, 4, 1,  Tun, 1, 4,  1,  no,  yes, ; Grs 2
+Forest,          1,2,  1,0,0,    no, 0, 1, 1,   no, 0, 1,  1,  no,  yes, ; For 3
+Urban,           1,2,  1,0,0,    no, 0, 1, 1,   no, 0, 1,  1,  no,   no, ; Hil 4
+Cloud Cover,     1,6,  1,0,0,    no, 0, 1, 1,   no, 0, 1,  1,  no,  yes, ; Mou 5
+Searchlights,    1,1,  1,0,0,    no, 0, 1, 1,   no, 0, 1,  1,  no,  yes, ; Tun 6
+Hills,           1,2,  1,0,0,    no, 0, 1, 1,   no, 0, 1,  1,  no,  yes, ; Gla 7
+Bombed RR,       2,2,  1,0,0,    no, 0, 1, 1,   no, 0, 1,  1,  no,  yes, ; Swa 8
+Airfield,        1,2,  4,4,0,    no, 0, 1, 1,   no, 0, 1,  1,  no,   no, ; Jun 9
+Water,           1,2,  2,0,0,    no, 0, 1, 1,   no, 0, 1,  1,  no,   no, ; Oce 10
+Firestorm,       5,2,  0,0,0,    no, 0, 1, 1,   no, 0, 1,  1,  no,  yes, ; Bbb 11
+Rubble,          2,2,  1,0,0,    no, 0, 1, 1,   no, 0, 1,  1,  no,   no, ; Ccc 12
+Bombed RR,       2,2,  1,0,0,    no, 0, 1, 1,   no, 0, 1,  1,  no,  yes, ; Ddd 13
+Bombed Industry, 2,2,  1,0,0,    no, 0, 1, 1,   no, 0, 1,  1,  no,   no, ; Eee 14
+Target,          1,2,  1,0,0,    no, 0, 1, 1,   no, 0, 1,  1,  no,   no, ; Fff 15
+Europe,          1,2,  1,0,0,
+Europe,          1,2,  1,1,0,
+Europe,          1,2,  2,0,0,
+Europe,          1,2,  1,0,0,
+Europe,          1,2,  1,0,0,
+Europe,          1,6,  1,0,0,
+Europe,          1,2,  1,0,0,
+Europe,          1,2,  1,0,0,
+Europe,          1,2,  1,0,0,
+Europe,          1,2,  4,4,0,
+Water,           1,2,  2,0,0,
+Europe,          1,2,  0,0,0, ; Bbb1
+Europe,          1,2,  1,0,0, ; Ccc1
+Europe,          1,2,  1,0,0, ; Ddd1
+Europe,          1,2,  1,0,0, ; Eee1
+Europe,          1,2,  1,0,0, ; Fff1
+Europe,          1,2,  1,0,0,
+Europe,          1,2,  1,1,0,
+Europe,          1,2,  2,0,0,
+Europe,          1,2,  1,0,0,
+Europe,          1,2,  1,0,0,
+Europe,          1,6,  1,0,0,
+Europe,          1,2,  1,0,0,
+Europe,          1,2,  1,0,0,
+Europe,          1,2,  1,0,0,
+Europe,          1,2,  4,4,0,
+Water,           1,2,  2,0,0,
+Europe,          1,2,  0,0,0, ; Bbb1
+Europe,          1,2,  1,0,0, ; Ccc1
+Europe,          1,2,  1,0,0, ; Ddd1
+Europe,          1,2,  1,0,0, ; Eee1
+Europe,          1,2,  1,0,0, ; Fff1
+
+@TERRAIN3
+SAVE,            1,2,  1,0,0,    no, 1, 1, 1,   no, 1, 1,  1,  no,   no, ; Drt 0
+SAVE,            1,2,  1,0,0,    no, 1, 1, 1,   no, 1, 1,  1,  no,   no, ; Pln 1
+SAVE,            1,2,  1,0,0,    no, 1, 1, 1,   no, 1, 1,  1,  no,   no, ; Grs 2
+SAVE,            1,2,  1,0,0,    no, 1, 1, 1,   no, 1, 1,  1,  no,   no, ; For 3
+SAVE,            1,2,  1,0,0,    no, 1, 1, 1,   no, 1, 1,  1,  no,   no, ; Hil 4
+SAVE,            1,2,  1,0,0,    no, 1, 1, 1,   no, 1, 1,  1,  no,   no, ; Mou 5
+SAVE,            1,2,  1,0,0,    no, 1, 1, 1,   no, 1, 1,  1,  no,   no, ; Tun 6
+SAVE,            1,2,  1,0,0,    no, 1, 1, 1,   no, 1, 1,  1,  no,   no, ; Gla 7
+SAVE,            1,2,  1,0,0,    no, 1, 1, 1,   no, 1, 1,  1,  no,   no, ; Swa 8
+SAVE,            1,2,  1,0,0,    no, 1, 1, 1,   no, 1, 1,  1,  no,   no, ; Jun 9
+SAVE,            1,2,  1,0,0,    no, 1, 1, 1,   no, 1, 1,  1,  no,   no, ; Oce 10
+SAVE,            1,2,  1,0,0,    no, 1, 1, 1,   no, 1, 1,  1,  no,   no, ; Bbb 11
+SAVE,            1,2,  1,0,0,    no, 1, 1, 1,   no, 1, 1,  1,  no,   no, ; Ccc 12
+SAVE,            1,2,  1,0,0,    no, 1, 1, 1,   no, 1, 1,  1,  no,   no, ; Ddd 13
+SAVE,            1,2,  1,0,0,    no, 1, 1, 1,   no, 1, 1,  1,  no,   no, ; Eee 14
+SAVE,            1,2,  1,0,0,    no, 1, 1, 1,   no, 1, 1,  1,  no,   no, ; Fff 15
+SAVE,            1,2,  1,0,0,
+SAVE,            1,2,  1,0,0,
+SAVE,            1,2,  1,0,0,
+SAVE,            1,2,  1,0,0,
+SAVE,            1,2,  1,0,0,
+SAVE,            1,2,  1,0,0,
+SAVE,            1,2,  1,0,0,
+SAVE,            1,2,  1,0,0,
+SAVE,            1,2,  1,0,0,
+SAVE,            1,2,  1,0,0,
+SAVE,            1,2,  1,0,0,
+SAVE,            1,2,  1,0,0, ; Bbb1
+SAVE,            1,2,  1,0,0, ; Ccc1
+SAVE,            1,2,  1,0,0, ; Ddd1
+SAVE,            1,2,  1,0,0, ; Eee1
+SAVE,            1,2,  1,0,0, ; Fff1
+SAVE,            1,2,  1,0,0,
+SAVE,            1,2,  1,0,0,
+SAVE,            1,2,  1,0,0,
+SAVE,            1,2,  1,0,0,
+SAVE,            1,2,  1,0,0,
+SAVE,            1,2,  1,0,0,
+SAVE,            1,2,  1,0,0,
+SAVE,            1,2,  1,0,0,
+SAVE,            1,2,  1,0,0,
+SAVE,            1,2,  1,0,0,
+SAVE,            1,2,  1,0,0,
+SAVE,            1,2,  1,0,0, ; Bbb1
+SAVE,            1,2,  1,0,0, ; Ccc1
+SAVE,            1,2,  1,0,0, ; Ddd1
+SAVE,            1,2,  1,0,0, ; Eee1
+SAVE,            1,2,  1,0,0, ; Fff1
+
+@SECONDARY_MAPS
+1, 70,90, 3,2,  0,0,0,0,    9,4,30,  15,10,50, 0,0,0,
+2, 0,0,   38,2, 30,30,60,0, 0,0,0,   0,0,0,    0,0,0,
+
+
+
+@GOVERNMENTS
+Anarchy,        Mr.,         Ms.
+NOT USED,       NOT USED,   NOT USED
+NOT USED,       NOT USED,   NOT USED
+Grand Alliance, Air Marshall, Air Marshall
+NOT USED,       NOT USED,   NOT USED
+Axis Alliance,  Reichsmarshall, Reichsmarshall
+NOT USED,       NOT USED,   NOT USED
+
+;
+;   Leaders
+;
+;   leader, female, color, style, plural, adjective, ...
+;           ...attack, expand, civilize, ...
+;           ...govt, male, female...<repeat>
+;
+;   female:     0 = male           1 = female
+;
+;   color:  Color set (1 - 7)
+;   style:  City style (0 - 3)
+;           0 = Bronze Age
+;           1 = Classical
+;           2 = Far East
+;           3 = Medieval
+;
+;   attack:     1 = aggressive    -1 = rational
+;   expand:     1 = expansionist  -1 = perfectionist
+;   civilize:   1 = civilized     -1 = militaristic
+;
+;   govt = government type for name replacement (0 = Anarchy, 6 = Democracy)
+;
+;   male, female = titles for leader of government
+;
+@LEADERS
+James Doolittle, James Doolittle,          0, 1, 1, Allies,          Allied,          -1,  1,  0,
+Hermann Göring, Hermann Göring,            0, 2, 2, Germans,         German,           1,  1, -1,
+Events,    Events,                     0, 3, 3, Events,        Events,         1, -1,  1,  
+Not Used,    Not Used,                     0, 4, 3, Not used,        Not used,         1, -1,  1, 
+Not Used,    Not Used,                     0, 5, 3, Not used,        Not used,         1, -1,  1, 
+Not Used,    Not Used,                     0, 6, 3, Not used,        Not used,         1, -1,  1, 
+Not Used,    Not Used,                     0, 7, 3, Not used,        Not used,         1, -1,  1, 
+James Doolittle, James Doolittle,          0, 1, 1, Allies,          Allied,          -1,  1,  0,
+Hermann Göring, Hermann Göring,            0, 2, 2, Germans,         German,           1,  1, -1,
+Events,    Events,                     0, 3, 3, Events,        Events,         1, -1,  1, 
+Not Used,    Not Used,                     0, 4, 3, Not used,        Not used,         1, -1,  1, 
+Not Used,    Not Used,                     0, 5, 3, Not used,        Not used,         1, -1,  1, 
+Not Used,    Not Used,                     0, 6, 3, Not used,        Not used,         1, -1,  1, 
+Not Used,    Not Used,                     0, 7, 3, Not used,        Not used,         1, -1,  1, 
+James Doolittle, James Doolittle,          0, 1, 1, Allies,          Allied,          -1,  1,  0,
+Hermann Göring, Hermann Göring,            0, 2, 2, Germans,         German,           1,  1, -1,
+Events,    Events,                     0, 3, 3, Events,        Events,         1, -1,  1, 
+Not Used,    Not Used,                     0, 4, 3, Not used,        Not used,         1, -1,  1, 
+Not Used,    Not Used,                     0, 5, 3, Not used,        Not used,         1, -1,  1,  
+Not Used,    Not Used,                     0, 6, 3, Not used,        Not used,         1, -1,  1, 
+Not Used,    Not Used,                     0, 7, 3, Not used,        Not used,         1, -1,  1, 
+
+Saladin,    ...,     0, 5, Arabs,       Arab,        1,  0,  1,     4, Ayatollah, Ayatollah, 2, Sultan, Sultana
+Atawallpa,  ...,     0, 1, Incas,       Inca,       -1,  1,  1,
+
+
+
+;
+;   Trading Commodities
+;
+@CARAVAN
+Lubricants,
+Stronger Gears,
+Inline Engines,
+Radial Engines,
+Rocket Engines,
+Pulse-Jet Engines,
+Jet Engines,
+Swept Wings,
+Radar Set,
+ECM,
+Rocket Fuels,
+Jet Fuels,
+Guided Missiles,
+Decryptors,
+Synthetic Fuels,
+Prototypes,
+
+
+@ORDERS
+Fortify,            F
+Fortified,          F
+Sleep,              S
+Build Fortress,     F
+Build Road,         R
+Build Irrigation,   I
+Build Mine,         m
+Transform,          O
+Clean Pollution,    p
+Build Airbase,      E
+Build Transporter,  j
+Go to,              G
+
+
+@DIFFICULTY
+DO NOT USE
+DO NOT USE
+DO NOT USE
+DO NOT USE
+DO NOT USE
+Air Marshall
+
+@ATTITUDES
+Worshipful
+Friendly
+Cordial
+Receptive
+Neutral
+Reserved
+Icy
+Hostile
+Enraged
+
+
+@CIVILIZE2
+0		; AFl	Interceptors I
+0		; Alp	Interceptors II
+0		; Amp	Interceptors III
+0		; Ast	Escort Fighters I
+0		; Ato	Escort Fighters II
+1		; Aut	Night Bombing I
+0		; Ban	Escort Fighters III
+5		; Bri	NOT USED
+1		; Bro	Escort Fighters IV
+0		; Cer	1940s Tech I
+2		; Che	Bomber Destroyers I
+2		; Chi	Bomber Destroyers II
+2		; CoL	Interceptors IV
+0		; CA	Night Fighters I
+0		; Cmb	Night Fighters II
+1		; Cmn	The Grand Alliance
+0		; Cmp	Night Fighters III
+0		; Csc	Advanced Radar I
+5		; Cst	NOT USED
+0		; Cor	Advanced Radar II
+0		; Cur	Engines I
+5		; Dem	NOT USED
+0		; Eco	Engines II
+0		; E1	Engines III
+1		; E2	Night Bombing II
+0		; Eng	Jabo I
+0		; Env	Jabo II
+0		; Esp	Jabo III
+0		; Exp	Engines IV
+0		; Feu	Experimental Design
+2		; Fli	Volksjäger
+5		; Fun	NOT USED
+0		; FP	Centrifugal-Flow Compressor
+0		; Gen	Axial-Flow Compressor
+5		; Gue	NOT USED
+5		; Gun	NOT USED
+0		; Hor	Jet Fighters
+2		; Ind	The Third Reich
+0		; Inv	Jet Fighter Design
+2		; Iro	Jet Bombers I
+2		; Lab	Jet Bombers II
+2		; Las	Wunderwaffen Program
+2		; Ldr	Pulse-Jet Engine
+2		; Lit	Vergeltungswaffen 1
+2		; Too	Rocketry
+2		; Mag	Vergeltungswaffen 2
+0		; Map	Strategic Bombers I
+0		; Mas	Strategic Bombers II
+0		; MP	Strategic Bombers III
+1		; Mat	Window
+1		; Med	Tactical Bombers I
+1		; Met	Tactical Bombers II
+1		; Min	Tactical Bombers III
+2		; Mob	Rocket Fighters
+5		; Mon	NOT USED
+0		; MT	1940s Tech II
+0		; Mys	1940s Tech III
+0		; Nav	Jet Fighter Experiments
+2		; NF	Jägernotprogramm
+2		; NP	Wilde Sau
+1		; Phi	Night Bombing III
+0		; Phy	Industry I
+0		; Pla	Industry II
+0		; Plu  	Industry III
+0		; PT	Fuel Production I
+0		; Pot	Fuel Production II
+5		; Rad	NOT USED
+5		; RR	NOT USED
+0		; Rec	Fuel Production III
+0		; Ref	War Economy
+0		; Rfg	Rationing
+2		; Rep	The Axis Powers
+2		; Rob	Jägerstab
+3		; Roc	Operation Shingle
+3		; San	Operation Overlord Prep.
+3		; Sea	Operation Neptune
+3		; SFl	Vistula-Oder Offensive
+1		; Sth	Tuskeegee Airmen
+0		; SE	Mass-Production Focus
+0		; Stl	High-Technology Focus
+0		; Sup	Argument for Fighter Focus
+0		; Tac	Fighters Prioritized
+0		; The	1940s Tech IV
+0		; ToG	Proximity Fuses
+0		; Tra	Aircraft Prototypes
+1		; Uni	Search for Long-Range Fighter
+1		; War	The Allison-Powered Mustang
+1		; Whe	Rolls-Royce Merlin 61 Retrofit	
+0		; Wri	Advanced Radar III
+0		; ...	Delays
+0		; U1	Tactics I
+0		; U2	Tactics II
+0		; U3	Tactics III
+1		; X1	Roam at Will
+3		; X2	Long-Range Escorts
+5		; X3	Albert Speer's Death
+0		; X4	Political Support I
+0		; X5	Political Support II
+0		; X6 	Political Support III
+0		; X7  	Political Support IV
+
+
+
+@LEADERS2
+00212200		;Allies
+02021200		;Germans
+00000000		;
+00000000		; 
+00000000		;
+00000000		;
+00000000		;
+00212200		;Allies
+02021200		;Germans
+00000000		;
+00000000		;
+00000000		;
+00000000		; 
+00000000		;
+00212200		;Allies
+02021200		;Germans
+00000000		;
+00000000		;
+00000000		;
+00000000		;
+00000000		;
+
+00000000		;  
+00000000		; 
+
+
+; Advanced unit fields
+
+; A) 'tribe may build' mask:		0 - can't; 1 - can
+; B) 'not allowed on map' mask:		1 - not allowed on map
+; C) minimum bribe amount:			n - minimum bribe; 0 - don't care; -1 - can't bribe
+; D) 'build transport site' mask:	1: can; 0: can't for each site type
+; E) 'use transport site' mask:		1: can; 0: can't for each site type
+; F) native transport ability:		1: can; 0: can't for each map relationship type
+; G) General flags
+;	00000001	invisible until attack:					1 - invisible
+;	00000010	non-disbandable (human players only):	1 - cannot disband
+;   00000100	0-range-air-unit damage override:		1 - override damage
+;   00001000	barbarian units can't be bought off:	1 - can't buy off
+;	00010000	impassable terrain override:			1 - override impassable terrain
+;   01000000    barbarian unit will not expire:         1 - no expire
+;	10000000    override .SPR file for this unit:	    1 - don't use .SPR
+
+;   A         B     C          D                 E               F             G
+
+@UNITS_ADVANCED
+00000010, 00001110,-1, 0000000000000000,0000000000000000,0000000000000000, 10010000  ;Red Army Group 
+00000110, 00001010,-1, 0000000000000000,0000000000000000,0000000000000000, 10010000  ;Construction Team
+00000010, 00001010,-1, 0000000000000000,0000000000000000,0000000000000000, 10010000  ;Bofors 40mm
+00000110, 00001110,-1, 0000000000000000,0000000000000000,0000000000000000, 10010000  ;Early Radar
+00000110, 00001110,-1, 0000000000000000,0000000000000000,0000000000000000, 10010000  ;Advanced Radar
+00000100, 00001110,-1, 0000000000000000,0000000000000000,0000000000000000, 10010000  ;Fw200
+00000110, 00001010,-1, 0000000000000000,0000000000000010,0000000000000000, 10000000  ;Mfg Goods
+00000000, 00001101,-1, 0000000000000000,0000000000000000,0000000000000000, 10010010  ;Railyard
+00000000, 00001101,-1, 0000000000000000,0000000000000000,0000000000000000, 10010010  ;Docks
+00000100, 00001110,-1, 0000000000000000,0000000000000000,0000000000000000, 10010000  ;Sdkfz 7/2
+00000100, 00001110,-1, 0000000000000000,0000000000000000,0000000000000000, 10010000  ;88mm Flak Battery
+00000100, 00001110,-1, 0000000000000000,0000000000000000,0000000000000000, 10000000  ;Flak Train
+00000100, 00001100,-1, 0000000000000000,0000000000000000,0000000000000001, 10010000  ;Me109G6
+00000100, 00001100,-1, 0000000000000000,0000000000000000,0000000000000001, 10010000  ;Me190G10
+00000100, 00001100,-1, 0000000000000000,0000000000000000,0000000000000001, 10010000  ;Me109K4
+00000100, 00001100,-1, 0000000000000000,0000000000000000,0000000000000001, 10010000  ;Fw190A6
+00000100, 00001100,-1, 0000000000000000,0000000000000000,0000000000000001, 10010000  ;Fw190A8
+00000100, 00001100,-1, 0000000000000000,0000000000000000,0000000000000001, 10010000  ;Fw190D9
+00000100, 00001100,-1, 0000000000000000,0000000000000000,0000000000000001, 10010000  ;Ta152
+00000000, 00001101,-1, 0000000000000000,0000000000000000,0000000000000000, 10010010  ;Military Port
+00000100, 00001000,-1, 0000000000000000,0000000000000000,0000000000000001, 10010000  ;Me110
+00000100, 00001000,-1, 0000000000000000,0000000000000000,0000000000000001, 10010000  ;Me410
+00000100, 00001000,-1, 0000000000000000,0000000000000000,0000000000000000, 10010000  ;Ju88C
+00000100, 00001000,-1, 0000000000000000,0000000000000000,0000000000000000, 10010000  ;Ju88G
+00000100, 00001000,-1, 0000000000000000,0000000000000000,0000000000000000, 10010000  ;He219
+00000100, 00001100,-1, 0000000000000000,0000000000000000,0000000000000001, 10010000  ;He162
+00000100, 00001100,-1, 0000000000000000,0000000000000000,0000000000000001, 10010000  ;Me163
+00000100, 00001100,-1, 0000000000000000,0000000000000000,0000000000000001, 10010000  ;Me262
+00000100, 00001110,-1, 0000000000000000,0000000000000000,0000000000000000, 10010000  ;Ju87G
+00000100, 00001110,-1, 0000000000000000,0000000000000000,0000000000000000, 10010000  ;Fw190F
+00000100, 00001110,-1, 0000000000000000,0000000000000000,0000000000000000, 10010000  ;Do335
+00000100, 00001000,-1, 0000000000000000,0000000000000000,0000000000000001, 10010000  ;Do217
+00000100, 00001000,-1, 0000000000000000,0000000000000000,0000000000000001, 10010000  ;He277
+00000100, 00001110,-1, 0000000000000000,0000000000000000,0000000000000000, 10010000  ;Arado234
+00000100, 00001100,-1, 0000000000000000,0000000000000000,0000000000000001, 10010000  ;Go229
+00000010, 00001100,-1, 0000000000000000,0000000000000000,0000000000000001, 10010000  ;Spitfire IX
+00000010, 00001100,-1, 0000000000000000,0000000000000000,0000000000000001, 10010000  ;Spitfire XII
+00000010, 00001100,-1, 0000000000000000,0000000000000000,0000000000000001, 10010000  ;Spitfire XIV
+00000010, 00001110,-1, 0000000000000000,0000000000000000,0000000000000000, 10010000  ;Hurricane IV
+00000010, 00001110,-1, 0000000000000000,0000000000000000,0000000000000000, 10010000  ;Typhoon
+00000010, 00001110,-1, 0000000000000000,0000000000000000,0000000000000000, 10010000  ;Tempest
+00000010, 00001100,-1, 0000000000000000,0000000000000000,0000000000000001, 10010000  ;Meteor
+00000010, 00001011,-1, 0000000000000000,0000000000000000,0000000000000000, 10010000  ;Beaufighter
+00000010, 00001011,-1, 0000000000000000,0000000000000000,0000000000000000, 10010000  ;Mosquito NF Mk II
+00000010, 00001011,-1, 0000000000000000,0000000000000000,0000000000000000, 10010000  ;Mosquito NF Mk XIII
+00000000, 00001101,-1, 0000000000000000,0000000000000000,0000000000000000, 10010010  ;Industry I
+00000000, 00001101,-1, 0000000000000000,0000000000000000,0000000000000000, 10010010  ;Industry II
+00000000, 00001101,-1, 0000000000000000,0000000000000000,0000000000000000, 10010010  ;Industry III
+00000000, 00001000,-1, 0000000000000000,0000000000000000,0000000000000000, 10010010  ;Depth Charge
+00000110, 00001110,-1, 0000000000000000,0000000000000000,0000000000000000, 10010000  ;Barrage Balloons
+00000010, 00001100,-1, 0000000000000000,0000000000000000,0000000000000001, 10010000  ;P-47D11
+00000010, 00001100,-1, 0000000000000000,0000000000000000,0000000000000001, 10010000  ;P-47D25
+00000010, 00001100,-1, 0000000000000000,0000000000000000,0000000000000000, 10010000  ;P-47D40
+00000000, 00001100,-1, 0000000000000000,0000000000000000,0000000000000001, 10010000  ;Experten
+00000010, 00001100,-1, 0000000000000000,0000000000000000,0000000000000001, 10010000  ;P-38H
+00000010, 00001100,-1, 0000000000000000,0000000000000000,0000000000000001, 10010000  ;P-38J
+00000010, 00001100,-1, 0000000000000000,0000000000000000,0000000000000001, 10010000  ;P-51B
+00000010, 00001100,-1, 0000000000000000,0000000000000000,0000000000000001, 10010000  ;P-51D
+00000010, 00001100,-1, 0000000000000000,0000000000000000,0000000000000001, 10010000  ;P-80
+00000010, 00001011,-1, 0000000000000000,0000000000000000,0000000000000000, 10010000  ;Stirling
+00000010, 00001011,-1, 0000000000000000,0000000000000000,0000000000000000, 10010000  ;Halifax
+00000010, 00001011,-1, 0000000000000000,0000000000000000,0000000000000000, 10010000  ;Lancaster
+00000010, 00001011,-1, 0000000000000000,0000000000000000,0000000000000000, 10010001  ;Pathfinder
+00000010, 00001100,-1, 0000000000000000,0000000000000000,0000000000000000, 10010000  ;A-20
+00000010, 00001100,-1, 0000000000000000,0000000000000000,0000000000000000, 10010000  ;B-26
+00000010, 00001100,-1, 0000000000000000,0000000000000000,0000000000000000, 10010000  ;A-26
+00000010, 00001100,-1, 0000000000000000,0000000000000000,0000000000000001, 10010000  ;B-17F
+00000010, 00001100,-1, 0000000000000000,0000000000000000,0000000000000001, 10010000  ;B-24J
+00000010, 00001100,-1, 0000000000000000,0000000000000000,0000000000000001, 10010000  ;B-17G
+00000000, 00001110,-1, 0000000000000000,0000000000000000,0000000000000000, 10010010  ;Army Group (Germans)
+00000000, 00001110,-1, 0000000000000000,0000000000000000,0000000000000000, 10010010  ;Battered Army Group (Germans)
+00000000, 00001100,-1, 0000000000000000,0000000000000000,0000000000000001, 10010000  ;Egon Mayer
+00000010, 00001110,-1, 0000000000000000,0000000000000000,0000000000000000, 10010000  ;AA Artillery
+00000100, 00001000,-1, 0000000000000000,0000000000000000,0000000000000001, 10010000  ;He111
+00000000, 00001110,-1, 0000000000000000,0000000000000000,0000000000000000, 10010010  ;Army Group (Allies)
+00000000, 00001110,-1, 0000000000000000,0000000000000000,0000000000000000, 10010010  ;Battered Army Group (Allies)
+00000010, 00001110,-1, 0000000000000000,0000000000000000,0000000000000000, 10010000  ;Sunderland
+00000000, 00001000,-1, 0000000000000000,0000000000000000,0000000000000000, 10010010  ;Hispanos
+00000000, 00001100,-1, 0000000000000000,0000000000000000,0000000000000001, 10010000  ;Hermann Graf
+00000000, 00001100,-1, 0000000000000000,0000000000000000,0000000000000001, 10010000  ;Josef Priller
+00000000, 00001100,-1, 0000000000000000,0000000000000000,0000000000000001, 10010000  ;Adolf Galland
+00000000, 00001110,-1, 0000000000000000,0000000000000000,0000000000000000, 10010010  ;Task Group (G)
+00000000, 00001110,-1, 0000000000000000,0000000000000000,0000000000000000, 10010010  ;Task Group (A)
+00000010, 00001100,-1, 0000000000000000,0000000000000000,0000000000000001, 10010000  ;332nd FG
+00000010, 00001100,-1, 0000000000000000,0000000000000000,0000000000000001, 10010000  ;15th AF Bombers
+00000000, 00001101,-1, 0000000000000000,0000000000000000,0000000000000000, 10010010  ;Aircraft Factory I
+00000000, 00001101,-1, 0000000000000000,0000000000000000,0000000000000000, 10010010  ;Aircraft Factory II
+00000000, 00001101,-1, 0000000000000000,0000000000000000,0000000000000000, 10010010  ;Aircraft Factory III
+00000000, 00001101,-1, 0000000000000000,0000000000000000,0000000000000000, 10010010  ;Fuel Refinery I
+00000000, 00001101,-1, 0000000000000000,0000000000000000,0000000000000000, 10010010  ;Fuel Refinery II
+00000000, 00001101,-1, 0000000000000000,0000000000000000,0000000000000000, 10010010  ;Fuel Refinery III
+00000000, 00001101,-1, 0000000000000000,0000000000000000,0000000000000000, 10010010  ;Urban Center I
+00000000, 00001101,-1, 0000000000000000,0000000000000000,0000000000000000, 10010010  ;Urban Center II
+00000000, 00001101,-1, 0000000000000000,0000000000000000,0000000000000000, 10010010  ;Urban Center III
+00000110, 00001110,-1, 0000000000000000,0000000000000000,0000000000000000, 10010000  ;Gun Battery
+00000000, 00001000,-1, 0000000000000000,0000000000000000,0000000000000000, 10010010  ;50 cal MG
+00000000, 00001000,-1, 0000000000000000,0000000000000000,0000000000000000, 10010010  ;20mm cannon
+00000000, 00001000,-1, 0000000000000000,0000000000000000,0000000000000000, 10010010  ;30mm cannon
+00000000, 00001000,-1, 0000000000000000,0000000000000000,0000000000000000, 10010010  ;250lb bomb
+00000000, 00001000,-1, 0000000000000000,0000000000000000,0000000000000000, 10010010  ;500lb bomb 
+00000000, 00001000,-1, 0000000000000000,0000000000000000,0000000000000000, 10010010  ;1000lb bomb
+00000000, 00001000,-1, 0000000000000000,0000000000000000,0000000000000000, 10010010  ;Window
+00000000, 00001100,-1, 0000000000000000,0000000000000000,0000000000000001, 10010000  ;H.W. Schnaufer
+00000000, 00001000,-1, 0000000000000000,0000000000000000,0000000000000000, 10010010  ;A2A rockets
+00000000, 00001100,-1, 0000000000000000,0000000000000000,0000000000000000, 10010010  ;Panzer Division
+00000000, 00000000,-1, 0000000000000000,0000000000000000,0000000000000010, 10010000  ;Damaged B-17F
+00000000, 00001100,-1, 0000000000000000,0000000000000000,0000000000000001, 11001100  ;Neutral Territory
+00000000, 00001100,-1, 0000000000000000,0000000000000000,0000000000000010, 10010000  ;Damaged B-17G
+00000010, 00001100,-1, 0000000000000000,0000000000000000,0000000000000001, 10010010  ;P-38L
+00000000, 00001010,-1, 0000000000000000,0000000000000000,0000000000000010, 10010010  ;Special Target
+00000000, 00001110,-1, 0000000000000000,0000000000000000,0000000000000000, 10000010  ;Torpedo
+00000110, 00001110,-1, 0000000000000000,0000000000000000,0000000000000000, 10010000  ;Aircraft Carrier
+00000000, 00001100,-1, 0000000000000000,0000000000000000,0000000000000001, 10010000  ;USAAF Ace
+00000000, 00001100,-1, 0000000000000000,0000000000000000,0000000000000001, 10010000  ;RAF Ace
+00000000, 00001000,-1, 0000000000000000,0000000000000000,0000000000000000, 10010010  ;Artillery barrage
+00000000, 00001110,-1, 0000000000000000,0000000000000000,0000000000000000, 10010000  ;Convoy
+00000000, 00001000,-1, 0000000000000000,0000000000000000,0000000000000000, 10010010  ;Light Flak
+00000010, 00001110,-1, 0000000000000000,0000000000000000,0000000000000000, 10010000  ;Yak-3
+00000010, 00001110,-1, 0000000000000000,0000000000000000,0000000000000000, 10010000  ;Il-2
+00000100, 00001010,-1, 0000000000000000,0000000000000000,0000000000000000, 10010000  ;3.7cm Flak
+00000100, 00001100,-1, 0000000000000000,0000000000000000,0000000000000001, 10010001  ;Ju188 (PR)
+00000100, 00001110,-1, 0000000000000000,0000000000000000,0000000000000000, 10010000  ;V1 Launch Site
+00000100, 00001110,-1, 0000000000000000,0000000000000000,0000000000000000, 10010000  ;V2 Launch Site
+00000000, 00001010,-1, 0000000000000000,0000000000000000,0000000000000010, 10010000  ;V1
+00000000, 00001010,-1, 0000000000000000,0000000000000000,0000000000000010, 10010000  ;V2
+00000010, 00001100,-1, 0000000000000000,0000000000000000,0000000000000001, 10010001  ;Mosquito (PR)
+00000100, 00001110,-1, 0000000000000000,0000000000000000,0000000000000000, 10010001  ;Wolf Pack
+		
+
+@MAP_TRANSPORT_RELATIONSHIPS
+0,1  ; 0/1   Low Alt Day to High Alt Day
+0,2  ; 1/2   Low Alt Day to High Alt Night
+0,0  ; 2/3   None
+0,0  ; 3/1   None
+0,0  ; 4/2   None
+0,0  ; 5/3   None
+0,0  ; 6/1   None
+0,0  ; 7/2   None
+0,0  ; 8/3   None
+0,0  ; 9/1   None
+0,0  ; 10/2   None
+0,0  ; 11/3   None
+0,0  ; 12/1   None
+0,0  ; 13/2   None
+0,0  ; 14/3   None
+0,0  ; 15/1   None
+
+; map, primary unit type, secondary unit type
+
+@INITIAL_SETTINGS
+0,0,3	;Romans
+0,0,3	;Babylonians
+0,0,3	;Germans  
+0,0,3	;Egyptians 
+0,0,3	;Americans  
+0,0,3	;Greeks     
+0,0,3	;Indians  
+0,0,3	;Russians    
+0,0,3	;Zulus       
+0,0,3	;French     
+0,0,3	;Aztecs     
+0,0,3	;Chinese   
+0,0,3	;English    
+0,0,3	;Mongols    
+0,0,3	;Celts      
+0,0,3	;Japanese    
+0,0,3	;Vikings    
+0,0,3	;Spanish     
+0,0,3	;Persians   
+0,0,3	;Carthaginians
+0,0,3	;Sioux      
+
+@SOUNDS
+RedInf.wav	; Red Army
+<none>		; Construction Team
+Tank3.wav	; Russian Tanks
+<none>		; Early Radar
+<none>		; Wurzburg Radar
+<none>		; Fw200
+<none>		; Mfg Goods
+<none>		; Railyard
+camera.wav	; Photos
+<none>		; Sdkfz 7/2
+<none>		; 88mm Flak Battery
+<none>		; Flak Train
+<none>		; 109G6
+<none>		; 109G14
+<none>		; 109K4
+<none>		; 190A5
+<none>		; 190A8
+<none>		; 190D9
+<none>		; Ta152
+<none>		; Port
+<none>		; 110
+<none>		; 410
+<none>		; 88C
+<none>		; 88G
+<none>		; He219
+<none>		; He162
+<none>		; Me163
+<none>		; Me262
+<none>		; Ju87
+<none>		; 190F8
+<none>		; Do335
+<none>		; Do217
+<none>		; He277
+<none>		; 234
+<none>		; 229
+<none>		; Spit9
+<none>		; Spit12
+<none>		; Spit14
+<none>		; Hurri
+<none>		; Typhoon
+<none>		; Tempest
+<none>		; Meteor
+<none>		; Beaufighter
+<none>		; Mossie2
+<none>		; Mossie13
+<none>		; IndustryI
+<none>		; IndustryII
+<none>		; IndustryIII
+<none>		; Prototype I
+<none>		; Prototype II
+<none>		; P47D11
+<none>		; P47D25
+<none>		; P47D40
+<none>		; P47M
+<none>		; P38H
+<none>		; P38J
+<none>		; P51B
+<none>		; P51D
+<none>		; P80
+<none>		; Stirling
+<none>		; Halifax
+<none>		; Lancaster
+<none>		; Pathfinder
+<none>		; A20
+<none>		; B26
+<none>		; A26
+<none>		; B17
+<none>		; B24
+<none>		; B17G
+GerAssault.wav	; Army Group (German)
+GerAssault.wav	; Battered Army Group (German)
+artillery.wav	; Artillery
+<none>		; AA artillery
+<none>		; He111
+BritAssault.wav	; Army Group (Allies)
+BritAssault.wav	; Battered Army Group (Allies)
+<none>		; Sunderland
+interceptor.wav	; Hispanos
+<none>		; Landing craft
+Destroyer.wav	; Destroyer
+<none>		; CL
+navbttle.wav	; Task Group (G)
+navbttle.wav	; Task Group (A)
+<none>		; 332nd
+<none>		; 15th AF
+<none>		; AirFacI
+<none>		; AirFacII
+<none>		; AirFacIII
+<none>		; RefI
+<none>		; RefII
+<none>		; RefIII
+<none>		; Urban I
+<none>		; Urban II
+<none>		; Urban III
+<none>		; Gun Battery
+escort.wav	; Mg
+interceptor.wav	; cannons 1
+jetattack.wav	; cannons 2
+bomber.wav	; 250
+medbomber.wav	; 500
+medbomber.wav	; 1000
+<none>		; window
+a2arocket.wav	; a2g rockets
+a2arocket.wav	; a2a rockets
+Panzer.wav	; Panzer Group
+flak.wav	; flak 2
+radar.wav	; radar1
+radar.wav	; radar2
+radar.wav	; radar3
+<none>		; Special Target
+torpedo.wav	; Torpedo
+navbttle.wav	; 5
+navbttle.wav	; 6
+navbttle.wav	; 8
+navbttle.wav	; Artillery barrage
+<none>		; freighter
+lightflak.wav	; light flak
+<none>		; yak3
+<none>		; il2
+<none>		; theatre hq
+<none>		; ju188
+<none>		; v1launch
+<none>		; v2launch
+V1.wav		; v1
+V2.wav		; v2
+<none>		; mossiepr
+torpedo.wav	; u-boat
+
+
+
+
+@RIVERS
+Railtrack,          ; map 1
+Railtrack,          ; map 2
+Railtrack,          ; map 3
+Railtrack,          ; map 4
+
+; please do not remove this line
+

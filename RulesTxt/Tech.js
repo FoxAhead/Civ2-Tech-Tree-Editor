@@ -1,5 +1,5 @@
 export class Tech {
-  constructor({ id, index, aiValue, modifier, name, preq1, preq2, epoch, category } = {}) {
+  constructor({ id, index, aiValue, modifier, name, preq1, preq2, epoch, category, group } = {}) {
     this.id = id;
     this.index = index;
     this.name = name;
@@ -9,6 +9,7 @@ export class Tech {
     this.preq2 = preq2;
     this.epoch = epoch;
     this.category = category;
+    this.group = group;
   }
   set name(value) {
     this._name = value ? value.substring(0, 49) : "";;
@@ -30,11 +31,11 @@ export class Tech {
     return !this.preq.includes('no');
     // return this.preq1 !== 'no';
   }
-  serialize() {
-    const namePart = (this.name + ",").padEnd(20);
-    const params = `${this.aiValue.toString().padStart(2)},${this.modifier.toString().padStart(2)},`;
-    const preqs = ` ${this.preq1.padStart(3)}, ${this.preq2.padStart(3)},`;
-    const end = ` ${this.epoch}, ${this.category}`;
-    return `${namePart} ${params} ${preqs} ${end}    ; ${this.id}`;
-  }
+  // serialize() {
+  //   const namePart = (this.name + ",").padEnd(20);
+  //   const params = `${this.aiValue.toString().padStart(2)},${this.modifier.toString().padStart(2)},`;
+  //   const preqs = ` ${this.preq1.padStart(3)}, ${this.preq2.padStart(3)},`;
+  //   const end = ` ${this.epoch}, ${this.category}`;
+  //   return `${namePart} ${params} ${preqs} ${end}    ; ${this.id}`;
+  // }
 }

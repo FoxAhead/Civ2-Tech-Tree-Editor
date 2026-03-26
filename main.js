@@ -277,7 +277,7 @@ createApp({
 
     // Loading RULES.TXT
     const getAndRenderTechsFromRulesTxt = () => {
-      state.techs = rulesTxt.techs;
+      state.techs = rulesTxt.civilize.data;
       techTree.build(state.techs);
       renderGraph(state.techs);
     };
