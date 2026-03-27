@@ -11,7 +11,7 @@ export const normalPhysics = {
   springLength: 50,
   springConstant: 0.01,
   nodeDistance: 80,
-  damping: 0.5,
+  damping: 3.0,
   avoidOverlap: 1,
 };
 export const weakPhysics = {

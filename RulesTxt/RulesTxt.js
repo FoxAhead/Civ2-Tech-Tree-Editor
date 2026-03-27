@@ -2,180 +2,130 @@ import { Tech } from "./Tech.js";
 import { UnitType } from "./UnitType.js";
 import { TerrainType } from "./TerrainType.js";
 
-const COSMIC_FIELDS = [
-  'roadMovementMultiplier', 'triremeLostChance', 'foodPerCitizen', 'foodBoxRows',
-  'shieldBoxRows', 'settlersEatLowGov', 'settlersEatHighGov', 'unhappinessSizeChieftain',
-  'riotFactor', 'aqueductLimit', 'sewerLimit', 'techParadigm', 'transformTime',
-  'monarchyFreeSupport', 'communismFreeSupport', 'fundamFreeSupport',
-  'communismPalaceDistance', 'fundamSciencePenalty', 'productionChangePenalty',
-  'paradropRange', 'spaceshipMassThrust', 'fundamMaxScience'
-];
-
-// Configuration for all supported sections
-const SECTION_CONFIGS = {
-  '@COSMIC': {
-    expectedLines: 22,
-    fields: COSMIC_FIELDS,
-    parser: (line) => parseInt(line.split(';')[0]) || 0,
-    serializer: (part) => {
-      return COSMIC_FIELDS.map((field, i) => {
-        const val = part.data[field];
-        const comment = part.lines[i]?.includes(';') ? `\t; ${part.lines[i].split(';')[1].trim()}` : '';
-        return `${val}${comment}`;
-      });
-    }
-  },
-  '@CIVILIZE': {
-    expectedLines: 100,
-    parser: (line, i, rules) => rules.parseTech(line, i),
-    serializer: (part, rules) => part.data.map((tech, i) => rules.serializeTech(tech, part.lines[i])),
-  },
-  '@UNITS': {
-    expectedLines: 62,
-    parser: (line, i, rules) => rules.parseUnit(line, i),
-    serializer: (part, rules) => part.data.map(unit => rules.serializeUnit(unit)),
-  },
-  '@TERRAIN': {
-    expectedLines: 33,
-    parser: (line, i, rules) => rules.parseTerrain(line, i)
-  },
-  '@DIFFICULTY': {
-    expectedLines: 6,
-    parser: (line, i, rules) => rules.parseDifficulty(line, i)
-  },
-};
-
-const techIds = [
-  'AFl', 'Alp', 'Amp', 'Ast', 'Ato', 'Aut', 'Ban', 'Bri', 'Bro', 'Cer',
-  'Che', 'Chi', 'CoL', 'CA', 'Cmb', 'Cmn', 'Cmp', 'Csc', 'Cst', 'Cor',
-  'Cur', 'Dem', 'Eco', 'E1', 'E2', 'Eng', 'Env', 'Esp', 'Exp', 'Feu',
-  'Fli', 'Fun', 'FP', 'Gen', 'Gue', 'Gun', 'Hor', 'Ind', 'Inv', 'Iro',
-  'Lab', 'Las', 'Ldr', 'Lit', 'Too', 'Mag', 'Map', 'Mas', 'MP', 'Mat',
-  'Med', 'Met', 'Min', 'Mob', 'Mon', 'MT', 'Mys', 'Nav', 'NF', 'NP',
-  'Phi', 'Phy', 'Pla', 'Plu', 'PT', 'Pot', 'Rad', 'RR', 'Rec', 'Ref',
-  'Rfg', 'Rep', 'Rob', 'Roc', 'San', 'Sea', 'SFl', 'Sth', 'SE', 'Stl',
-  'Sup', 'Tac', 'The', 'ToG', 'Tra', 'Uni', 'War', 'Whe', 'Wri', 'FT',
-  'U1', 'U2', 'U3', 'X1', 'X2', 'X3', 'X4', 'X5', 'X6', 'X7'];
-
 const langEncodings = {
   'TXT': 'windows-1252', 'RUS': 'windows-1251', 'POL': 'windows-1250'
 };
 
-class SectionPart {
-  constructor(name = null, lines = []) {
+class Section {
+  constructor(name = null, lines = [], rules) {
     this.name = name;
     this.lines = lines;
+    this.rules = rules;
     this.data = null;
+    this.ready = false;
+    this.doParse = false;
   }
-  getLines(rules, forceSerialize = false) {
-    const config = SECTION_CONFIGS[this.name];
-    if (forceSerialize && config?.serializer && this.data) {
-      return config.serializer(this, rules);
+  validateAndParse() {
+    if (this.ready) return;
+    this.preValidate();
+    if (this.doParse)
+      this.parse()
+    else
+      this.data = this.lines;
+    this.postValidate?.();
+    this.ready = true;
+  }
+  preValidate() {
+    const expectedLines = this.expectedLines?.[this.rules.version] ?? this.expectedLines?.default;
+    if (expectedLines && this.lines.length !== expectedLines) {
+      throw new Error(`Section ${this.name}: Expected ${expectedLines} lines, found ${this.lines.length}`);
     }
-    return this.lines;
+  }
+  parse() {
+    this.data = this.lines.map((line, i) => this.parseLine(line, i))
+  }
+  parseLine(line, index) {
+    return line;
+  }
+  getLines(doSerialize = false) {
+    this.preSerialize?.();
+    if (doSerialize && typeof this.serializeLine === 'function' && this.data) {
+      return this.data.map((item, i) => this.serializeLine(item, this.lines[i]))
+    } else {
+      return this.lines;
+    }
   }
 }
 
-export class RulesTxt {
-  #parts = [];
-  #sectionsMap = new Map();
-  #lineSeparator = '\n';
-  #enabledSections = [];
-  currentFileName = '';
-
-  constructor(text, fileName = '', enabledSections = []) {
-    this.currentFileName = fileName;
-    this.#enabledSections = enabledSections.map(s => s.toUpperCase());
-    const match = text.match(/\r?\n/);
-    this.#lineSeparator = match ? match[0] : '\n';
-    this.#parseToParts(text);
-  }
-
-  /**
-   * Factory method to load and initialize RulesTxt
-   */
-  static async loadFromFile(source, enabledSections = Object.keys(SECTION_CONFIGS)) {
-    let buffer, name;
-    if (typeof source === 'string') {
-      const response = await fetch(source);
-      buffer = await response.arrayBuffer();
-      name = source;
-    } else {
-      buffer = await source.arrayBuffer();
-      name = source.name || '';
-    }
-    const ext = name.split('.').pop().toUpperCase();
-    const encoding = langEncodings[ext] || 'windows-1252';
-    const text = new TextDecoder(encoding).decode(buffer);
-    return new RulesTxt(text, name, enabledSections);
-  }
-
-  #parseToParts(text) {
-    const allLines = text.split(/\r\n|\r|\n/);
-    let currentSectionName = null;
-    let currentLines = [];
-
-    const flush = (nextSectionName = null) => {
-      if (currentLines.length === 0 && !currentSectionName) return;
-      const part = new SectionPart(currentSectionName, currentLines);
-      if (currentSectionName) {
-        if (this.#sectionsMap.has(currentSectionName)) {
-          throw new Error(`Duplicate section found: ${currentSectionName}`);
-        }
-        this.#processSectionData(part);
-        this.#sectionsMap.set(currentSectionName, part);
-      }
-      this.#parts.push(part);
-      currentLines = [];
-      currentSectionName = nextSectionName;
-    };
-
-    for (let line of allLines) {
-      const trimmed = line.trim();
-      if (trimmed.startsWith('@')) {
-        flush(trimmed.toUpperCase());
-      } else if (currentSectionName && (trimmed === '' || trimmed.startsWith(';'))) {
-        flush(null);
-        currentLines.push(line);
-      } else {
-        currentLines.push(line);
-      }
-    }
-    flush();
-    this.#enabledSections.forEach(section => {
-      if (!this.#sectionsMap.has(section)) {
-        throw new Error(`Required section ${section} not found in file ${this.currentFileName}`);
-      }
+class SectionCosmic extends Section {
+  static fields = [
+    'roadMovementMultiplier', 'triremeLostChance', 'foodPerCitizen', 'foodBoxRows',
+    'shieldBoxRows', 'settlersEatLowGov', 'settlersEatHighGov', 'unhappinessSizeChieftain',
+    'riotFactor', 'aqueductLimit', 'sewerLimit', 'techParadigm', 'transformTime',
+    'monarchyFreeSupport', 'communismFreeSupport', 'fundamFreeSupport',
+    'communismPalaceDistance', 'fundamSciencePenalty', 'productionChangePenalty',
+    'paradropRange', 'spaceshipMassThrust', 'fundamMaxScience',
+    // ToT
+    'scoreCitizenValue', 'scoreWonderValue', 'scoreSpaceshipMultiplier', 'scorePollutionPenalty',
+    'scorePeaceKeepBonus', 'scoreFutureTechValue', 'scoreBetrayalPenalty', 'scoreUnitLossPenalty',
+    'goodieHutMask', 'helicoptersPickUpHuts'
+  ];
+  expectedLines = { MGE: 22, ToT: 32, ToTPP: 32 };
+  parse() {
+    this.data = {};
+    this.lines.forEach((line, i) => {
+      const field = SectionCosmic.fields[i];
+      if (field !== undefined) this.data[field] = parseInt(line.split(';')[0]) || 0;
     });
   }
+}
 
-  #processSectionData(part) {
-    if (!this.#enabledSections.includes(part.name)) return;
-    const config = SECTION_CONFIGS[part.name];
-    if (!config) return;
-    const lines = part.lines;
-    if (config.expectedLines && lines.length !== config.expectedLines) {
-      throw new Error(`Section ${part.name}: Expected ${config.expectedLines} lines, found ${lines.length}`);
-    }
-    if (config.fields) {
-      // Named fields
-      part.data = {};
-      config.fields.forEach((field, i) => {
-        if (lines[i] !== undefined) part.data[field] = config.parser(lines[i], i, this);
-      });
-    } else {
-      // List of objects
-      const count = config.expectedLines || lines.length;
-      part.data = lines.slice(0, count).map((line, i) => config.parser(line, i, this));
+class SectionCosmic2 extends Section {
+  parse() {
+    this.data = Object.fromEntries(
+      this.lines
+        .map(line => this.parseLine(line))
+        .filter(item => item !== null)
+        .map(item => [item.key, item.value])
+    );
+  }
+  parseLine(line) {
+    const cleanLine = line.split(';')[0].trim();
+    if (!cleanLine) return null;
+    const [key, ...rawValues] = cleanLine.split(',').map(s => s.trim());
+    const parsedValues = rawValues.map(v => (v !== "" && !isNaN(v) ? Number(v) : v));
+    return {
+      key,
+      value: parsedValues.length > 1 ? parsedValues : parsedValues[0]
+    };
+  }
+  postValidate() {
+    const n = this.data.NumberOfTechs;
+    if (n < 100 || n > 253) throw new Error(`ToTPP parametr NumberOfTechs is out of range: ${n}`);
+  }
+}
+
+class SectionCivilize extends Section {
+  static techIds = [
+    'AFl', 'Alp', 'Amp', 'Ast', 'Ato', 'Aut', 'Ban', 'Bri', 'Bro', 'Cer',
+    'Che', 'Chi', 'CoL', 'CA', 'Cmb', 'Cmn', 'Cmp', 'Csc', 'Cst', 'Cor',
+    'Cur', 'Dem', 'Eco', 'E1', 'E2', 'Eng', 'Env', 'Esp', 'Exp', 'Feu',
+    'Fli', 'Fun', 'FP', 'Gen', 'Gue', 'Gun', 'Hor', 'Ind', 'Inv', 'Iro',
+    'Lab', 'Las', 'Ldr', 'Lit', 'Too', 'Mag', 'Map', 'Mas', 'MP', 'Mat',
+    'Med', 'Met', 'Min', 'Mob', 'Mon', 'MT', 'Mys', 'Nav', 'NF', 'NP',
+    'Phi', 'Phy', 'Pla', 'Plu', 'PT', 'Pot', 'Rad', 'RR', 'Rec', 'Ref',
+    'Rfg', 'Rep', 'Rob', 'Roc', 'San', 'Sea', 'SFl', 'Sth', 'SE', 'Stl',
+    'Sup', 'Tac', 'The', 'ToG', 'Tra', 'Uni', 'War', 'Whe', 'Wri', 'FT',
+    'U1', 'U2', 'U3', 'X1', 'X2', 'X3', 'X4', 'X5', 'X6', 'X7'];
+  static {
+    const MAX_TOTAL = 253;
+    const currentLength = this.techIds.length;
+    for (let i = currentLength; i < MAX_TOTAL; i++) {
+      this.techIds.push('X' + i.toString(16).toUpperCase());
     }
   }
-
-  // --- Parsers ---
-
-  parseTech(line, index) {
+  static fields = ['<name', '>aiValue', '>modifier', '<preq1', '<preq2', '>epoch', '>category'];
+  get expectedLines() {
+    return {
+      MGE: 100,
+      ToT: 100,
+      ToTPP: this.rules.cosmic2?.data?.NumberOfTechs ?? 100
+    };
+  }
+  parseLine(line, index) {
     const tokens = line.split(';')[0].split(',').map(t => t.trim());
     return new Tech({
-      id: techIds[index], // techIds нужно импортировать или объявить в файле
+      id: SectionCivilize.techIds[index],
       index: index,
       name: tokens[0],
       aiValue: tokens[1],
@@ -183,11 +133,54 @@ export class RulesTxt {
       preq1: tokens[3],
       preq2: tokens[4],
       epoch: tokens[5],
-      category: tokens[6]
+      category: tokens[6],
+      group: this.rules.civilize2?.data[index]?.group,
     });
   }
+  preSerialize() {
+    this.pads = {};
+    SectionCivilize.fields.forEach(field => {
+      this.pads[field] = Math.max(...this.data.map(tech => tech[field.slice(1)].toString().length))
+    });
+  }
+  serializeLine(tech, originalLine) {
+    const parts = SectionCivilize.fields.map((field, index) => {
+      const isLast = index === SectionCivilize.fields.length - 1;
+      const align = field[0] === '>' ? 'padStart' : 'padEnd';
+      const key = field.slice(1);
+      const val = String(tech[key] ?? '') + (isLast ? '' : ',');
+      return val[align](isLast ? this.pads[field] : this.pads[field] + 1);
+    });
+    const comment = originalLine?.includes(';') ? `${originalLine.split(';')[1]}` : '';
+    return `${parts.join(' ')}    ;${comment}`;
+  }
+}
 
-  parseUnit(line, index) {
+class SectionCivilize2 extends Section {
+  get expectedLines() {
+    return {
+      MGE: 100,
+      ToT: 100,
+      ToTPP: this.rules.cosmic2?.data?.NumberOfTechs ?? 100
+    };
+  }
+  parseLine(line, index) {
+    const tokens = line.split(';')[0].split(',').map(t => t.trim());
+    return {
+      id: SectionCivilize.techIds[index],
+      index: index,
+      group: tokens[0],
+    };
+  }
+  serializeLine(item, originalLine) {
+    const group = this.rules.civilize.data[item.index].group;
+    const comment = originalLine?.includes(';') ? `${originalLine.split(';')[1]}` : '';
+    return `${group}\t\t;${comment}`;
+  }
+}
+
+class SectionUnits extends Section {
+  parseLine(line, index) {
     const tokens = line.split(';')[0].split(',').map(t => t.trim());
     return new UnitType({
       name: tokens[0],
@@ -206,8 +199,18 @@ export class RulesTxt {
       flags: parseInt(tokens[13], 2)
     });
   }
+  serializeLine(unit) {
+    const flags = unit.flags.toString(2); // Convert back to binary string
+    return [
+      unit.name, unit.until, unit.domain, unit.move, unit.rng,
+      unit.att, unit.def, unit.hit, unit.firepwr, unit.cost,
+      unit.hold, unit.role, unit.preq, flags
+    ].join(', ');
+  }
+}
 
-  parseTerrain(line, index) {
+class SectionTerrain extends Section {
+  parseLine(line, index) {
     const tokens = line.split(';')[0].split(',').map(t => t.trim());
     return new TerrainType({
       name: tokens[0],
@@ -218,42 +221,129 @@ export class RulesTxt {
       trade: parseInt(tokens[5])
     });
   }
+}
 
-  parseDifficulty(line, index) {
-    return line;
+class SectionDifficulty extends Section {
+  expectedLines = { default: 6 };
+}
+
+const SECTION_CLASSES = {
+  '@COSMIC': SectionCosmic,
+  '@COSMIC2': SectionCosmic2,
+  '@CIVILIZE': SectionCivilize,
+  '@CIVILIZE2': SectionCivilize2,
+  '@UNITS': SectionUnits,
+  '@TERRAIN': SectionTerrain,
+  '@DIFFICULTY': SectionDifficulty,
+}
+
+export class RulesTxt {
+  #parts = [];
+  #sectionsMap = new Map();
+  #lineSeparator = '\r\n';
+  #requiredSections = new Set();
+  currentFileName = '';
+  version = 'MGE';
+
+  constructor(text, fileName = '', requiredSections = []) {
+    this.currentFileName = fileName;
+    this.#requiredSections = new Set(requiredSections);
+    const match = text.match(/\r\n|\r|\n/);
+    this.#lineSeparator = match ? match[0] : '\r\n';
+    this.#parseToParts(text);
   }
 
-  // --- Serializers ---
-
-  serializeTech(tech, originalLine) {
-    const namePart = (tech.name + ",").padEnd(20);
-    const params = `${tech.aiValue.toString().padStart(1)},${tech.modifier.toString().padStart(2)},`;
-    const preqs = `${tech.preq1.padStart(5)},${tech.preq2.padStart(4)},`;
-    const end = `${tech.epoch.toString().padStart(2)},${tech.category.toString().padStart(2)}`;
-    const comment = originalLine?.includes(';') ? `${originalLine.split(';')[1]}` : '';
-    return `${namePart}${params}${preqs}${end}    ;${comment}`;
+  /**
+   * Factory method to load and initialize RulesTxt
+   */
+  static async loadFromFile(source, requiredSections = Object.keys(SECTION_CLASSES)) {
+    let buffer, name;
+    if (typeof source === 'string') {
+      const response = await fetch(source);
+      buffer = await response.arrayBuffer();
+      name = source;
+    } else {
+      buffer = await source.arrayBuffer();
+      name = source.name || '';
+    }
+    const ext = name.split('.').pop().toUpperCase();
+    const encoding = langEncodings[ext] || 'windows-1252';
+    const text = new TextDecoder(encoding).decode(buffer);
+    return new RulesTxt(text, name, requiredSections);
   }
 
-  serializeUnit(unit) {
-    const flags = unit.flags.toString(2); // Convert back to binary string
-    return [
-      unit.name, unit.until, unit.domain, unit.move, unit.rng,
-      unit.att, unit.def, unit.hit, unit.firepwr, unit.cost,
-      unit.hold, unit.role, unit.preq, flags
-    ].join(', ');
+  #parseToParts(text) {
+    const allLines = text.split(/\r\n|\r|\n/);
+    let currentSectionName = null;
+    let currentLines = [];
+
+    const flush = (nextSectionName = null) => {
+      if (currentLines.length === 0 && !currentSectionName) return;
+      const sectionClass = SECTION_CLASSES[currentSectionName] || Section;
+      const part = new sectionClass(currentSectionName, currentLines, this);
+      if (currentSectionName) {
+        if (this.#sectionsMap.has(currentSectionName)) {
+          throw new Error(`Duplicate section found: ${currentSectionName}`);
+        }
+        this.#sectionsMap.set(currentSectionName, part);
+      }
+      this.#parts.push(part);
+      currentLines = [];
+      currentSectionName = nextSectionName;
+    };
+
+    for (let line of allLines) {
+      const trimmed = line.trim();
+      if (trimmed.startsWith('@')) {
+        flush(trimmed.toUpperCase());
+      } else if (currentSectionName && (trimmed === '' || trimmed.startsWith(';') && currentSectionName !== '@COSMIC2')) {
+        flush(null);
+        currentLines.push(line);
+      } else {
+        currentLines.push(line);
+      }
+    }
+    flush();
+
+    // Detect game version
+    if (this.#sectionsMap.has('@COSMIC2')) {
+      this.version = 'ToTPP';
+    } else if (this.#sectionsMap.has('@CIVILIZE2')) {
+      this.version = 'ToT';
+    }
+    // Add dependent sections
+    if (this.#requiredSections.has('@CIVILIZE')) {
+      if (this.version.startsWith('ToT')) this.#requiredSections.add('@CIVILIZE2');
+      if (this.version === 'ToTPP') this.#requiredSections.add('@COSMIC2');
+    }
+    // Check sections existence and mark for parsing
+    this.#requiredSections.forEach(sectionName => {
+      const section = this.#sectionsMap.get(sectionName);
+      if (!section) {
+        throw new Error(`Required section ${sectionName} not found in file ${this.currentFileName}`);
+      }
+      section.doParse = true;
+    });
+
+    // Validate and Parse
+    const priorityNames = ['@COSMIC2', '@CIVILIZE2'];
+    priorityNames.forEach(name => this.#sectionsMap.get(name)?.validateAndParse());
+    this.#parts.forEach(part => part.validateAndParse());
   }
 
   // Геттеры для удобного доступа к данным
-  get cosmic() { return this.#sectionsMap.get('@COSMIC')?.data; }
-  get techs() { return this.#sectionsMap.get('@CIVILIZE')?.data || []; }
-  get unitTypes() { return this.#sectionsMap.get('@UNITS')?.data || []; }
-  get terrainTypes() { return this.#sectionsMap.get('@TERRAIN')?.data || []; }
+  get cosmic() { return this.#sectionsMap.get('@COSMIC') }
+  get cosmic2() { return this.#sectionsMap.get('@COSMIC2') }
+  get civilize() { return this.#sectionsMap.get('@CIVILIZE') }
+  get civilize2() { return this.#sectionsMap.get('@CIVILIZE2') }
+  get unitTypes() { return this.#sectionsMap.get('@UNITS') }
+  get terrainTypes() { return this.#sectionsMap.get('@TERRAIN') }
+  get difficulty() { return this.#sectionsMap.get('@DIFFICULTY') }
 
-
-  stringify(sectionsToUpdate = this.#enabledSections) {
+  stringify(sectionsToUpdate = this.#requiredSections) {
     return this.#parts.map(p => {
       const shouldUpdate = sectionsToUpdate.includes(p.name);
-      const content = p.getLines(this, shouldUpdate).join(this.#lineSeparator);
+      const content = p.getLines(shouldUpdate).join(this.#lineSeparator);
       return p.name ? `${p.name}${this.#lineSeparator}${content}` : content;
     }).join(this.#lineSeparator);
   }
@@ -263,14 +353,11 @@ export class RulesTxt {
    */
   saveToFile(fileName = 'RULES.TXT', sectionsToUpdate = []) {
     const text = this.stringify(sectionsToUpdate);
-
     const buffer = new Uint8Array(text.length);
     for (let i = 0; i < text.length; i++) {
       const charCode = text.charCodeAt(i);
-      // Если символ вне диапазона 0-255, заменяем на '?' (код 63)
       buffer[i] = charCode < 256 ? charCode : 63;
     }
-    // const blob = new Blob([text], { type: 'text/plain' });
     const blob = new Blob([buffer], { type: 'text/plain;charset=windows-1252' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
