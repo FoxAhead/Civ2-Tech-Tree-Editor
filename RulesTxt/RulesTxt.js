@@ -2,49 +2,6 @@ import { Tech } from "./Tech.js";
 import { UnitType } from "./UnitType.js";
 import { TerrainType } from "./TerrainType.js";
 
-// // Configuration for all supported sections
-
-// const SECTION_CONFIGS = {
-//   '@COSMIC': {
-//     expectedLines: 22,
-//     fields: COSMIC_FIELDS,
-//     parser: (line) => parseInt(line.split(';')[0]) || 0,
-//     serializer: (part) => {
-//       return COSMIC_FIELDS.map((field, i) => {
-//         const val = part.data[field];
-//         const comment = part.lines[i]?.includes(';') ? `\t; ${part.lines[i].split(';')[1].trim()}` : '';
-//         return `${val}${comment}`;
-//       });
-//     }
-//   },
-//   '@COSMIC2': {
-//     parser: (line) => {
-//       const [key, ...values] = line.split(',').map(s => s.trim());
-//       return { key, values: values.map(v => parseInt(v) || 0) };
-//     },
-//     serializer: (part) => part.lines
-//   },
-//   '@CIVILIZE': {
-//     expectedLines: 100,
-//     parser: (line, i, rules) => rules.parseTech(line, i),
-//     serializer: (part, rules) => part.data.map((tech, i) => rules.serializeTech(tech, part.lines[i])),
-//   },
-//   '@UNITS': {
-//     expectedLines: 62,
-//     parser: (line, i, rules) => rules.parseUnit(line, i),
-//     serializer: (part, rules) => part.data.map(unit => rules.serializeUnit(unit)),
-//   },
-//   '@TERRAIN': {
-//     expectedLines: 33,
-//     parser: (line, i, rules) => rules.parseTerrain(line, i)
-//   },
-//   '@DIFFICULTY': {
-//     expectedLines: 6,
-//     parser: (line, i, rules) => rules.parseDifficulty(line, i)
-//   },
-// };
-
-
 const langEncodings = {
   'TXT': 'windows-1252', 'RUS': 'windows-1251', 'POL': 'windows-1250'
 };
@@ -69,7 +26,7 @@ class Section {
     this.ready = true;
   }
   preValidate() {
-    const expectedLines = this.expectedLines?.[this.rules.version];
+    const expectedLines = this.expectedLines?.[this.rules.version] ?? this.expectedLines?.default;
     if (expectedLines && this.lines.length !== expectedLines) {
       throw new Error(`Section ${this.name}: Expected ${expectedLines} lines, found ${this.lines.length}`);
     }
@@ -80,8 +37,9 @@ class Section {
   parseLine(line, index) {
     return line;
   }
-  getLines(rules, forceSerialize = false) {
-    if (forceSerialize && typeof this.serializeLine === 'function' && this.data) {
+  getLines(doSerialize = false) {
+    this.preSerialize?.();
+    if (doSerialize && typeof this.serializeLine === 'function' && this.data) {
       return this.data.map((item, i) => this.serializeLine(item, this.lines[i]))
     } else {
       return this.lines;
@@ -156,6 +114,7 @@ class SectionCivilize extends Section {
       this.techIds.push('X' + i.toString(16).toUpperCase());
     }
   }
+  static fields = ['<name', '>aiValue', '>modifier', '<preq1', '<preq2', '>epoch', '>category'];
   get expectedLines() {
     return {
       MGE: 100,
@@ -175,30 +134,48 @@ class SectionCivilize extends Section {
       preq2: tokens[4],
       epoch: tokens[5],
       category: tokens[6],
-      group: group,
+      group: this.rules.civilize2?.data[index]?.group,
+    });
+  }
+  preSerialize() {
+    this.pads = {};
+    SectionCivilize.fields.forEach(field => {
+      this.pads[field] = Math.max(...this.data.map(tech => tech[field.slice(1)].toString().length))
     });
   }
   serializeLine(tech, originalLine) {
-    const namePart = (tech.name + ",").padEnd(20);
-    const params = `${tech.aiValue.toString().padStart(1)},${tech.modifier.toString().padStart(2)},`;
-    const preqs = `${tech.preq1.padStart(5)},${tech.preq2.padStart(4)},`;
-    const end = `${tech.epoch.toString().padStart(2)},${tech.category.toString().padStart(2)}`;
+    const parts = SectionCivilize.fields.map((field, index) => {
+      const isLast = index === SectionCivilize.fields.length - 1;
+      const align = field[0] === '>' ? 'padStart' : 'padEnd';
+      const key = field.slice(1);
+      const val = String(tech[key] ?? '') + (isLast ? '' : ',');
+      return val[align](isLast ? this.pads[field] : this.pads[field] + 1);
+    });
     const comment = originalLine?.includes(';') ? `${originalLine.split(';')[1]}` : '';
-    return `${namePart}${params}${preqs}${end}    ;${comment}`;
+    return `${parts.join(' ')}    ;${comment}`;
   }
 }
 
-class SectionCivilize2 extends SectionCivilize {
+class SectionCivilize2 extends Section {
+  get expectedLines() {
+    return {
+      MGE: 100,
+      ToT: 100,
+      ToTPP: this.rules.cosmic2?.data?.NumberOfTechs ?? 100
+    };
+  }
   parseLine(line, index) {
     const tokens = line.split(';')[0].split(',').map(t => t.trim());
     return {
       id: SectionCivilize.techIds[index],
+      index: index,
       group: tokens[0],
     };
   }
-  serializeLine(tech, originalLine) {
+  serializeLine(item, originalLine) {
+    const group = this.rules.civilize.data[item.index].group;
     const comment = originalLine?.includes(';') ? `${originalLine.split(';')[1]}` : '';
-    return `${tech.group}\t\t;${comment}`;
+    return `${group}\t\t;${comment}`;
   }
 }
 
@@ -247,6 +224,7 @@ class SectionTerrain extends Section {
 }
 
 class SectionDifficulty extends Section {
+  expectedLines = { default: 6 };
 }
 
 const SECTION_CLASSES = {
@@ -263,13 +241,13 @@ export class RulesTxt {
   #parts = [];
   #sectionsMap = new Map();
   #lineSeparator = '\r\n';
-  #enabledSections = [];
+  #requiredSections = new Set();
   currentFileName = '';
   version = 'MGE';
 
-  constructor(text, fileName = '', enabledSections = []) {
+  constructor(text, fileName = '', requiredSections = []) {
     this.currentFileName = fileName;
-    this.#enabledSections = enabledSections.map(s => s.toUpperCase());
+    this.#requiredSections = new Set(requiredSections);
     const match = text.match(/\r\n|\r|\n/);
     this.#lineSeparator = match ? match[0] : '\r\n';
     this.#parseToParts(text);
@@ -278,7 +256,7 @@ export class RulesTxt {
   /**
    * Factory method to load and initialize RulesTxt
    */
-  static async loadFromFile(source, enabledSections = Object.keys(SECTION_CLASSES)) {
+  static async loadFromFile(source, requiredSections = Object.keys(SECTION_CLASSES)) {
     let buffer, name;
     if (typeof source === 'string') {
       const response = await fetch(source);
@@ -291,7 +269,7 @@ export class RulesTxt {
     const ext = name.split('.').pop().toUpperCase();
     const encoding = langEncodings[ext] || 'windows-1252';
     const text = new TextDecoder(encoding).decode(buffer);
-    return new RulesTxt(text, name, enabledSections);
+    return new RulesTxt(text, name, requiredSections);
   }
 
   #parseToParts(text) {
@@ -309,7 +287,6 @@ export class RulesTxt {
         }
         this.#sectionsMap.set(currentSectionName, part);
       }
-      // part.parse();
       this.#parts.push(part);
       currentLines = [];
       currentSectionName = nextSectionName;
@@ -319,7 +296,7 @@ export class RulesTxt {
       const trimmed = line.trim();
       if (trimmed.startsWith('@')) {
         flush(trimmed.toUpperCase());
-      } else if (currentSectionName && (trimmed === '' || trimmed.startsWith(';'))) {
+      } else if (currentSectionName && (trimmed === '' || trimmed.startsWith(';') && currentSectionName !== '@COSMIC2')) {
         flush(null);
         currentLines.push(line);
       } else {
@@ -327,53 +304,46 @@ export class RulesTxt {
       }
     }
     flush();
-    this.#enabledSections.forEach(sectionName => {
-      const section = this.#sectionsMap.get(sectionName);
-      if (!section) {
-        throw new Error(`Required section ${sectionName} not found in file ${this.currentFileName}`);
-      } else {
-        section.doParse = true;
-      }
-    });
 
     // Detect game version
     if (this.#sectionsMap.has('@COSMIC2')) {
       this.version = 'ToTPP';
-      this.cosmic2.validateAndParse();
     } else if (this.#sectionsMap.has('@CIVILIZE2')) {
       this.version = 'ToT';
     }
+    // Add dependent sections
+    if (this.#requiredSections.has('@CIVILIZE')) {
+      if (this.version.startsWith('ToT')) this.#requiredSections.add('@CIVILIZE2');
+      if (this.version === 'ToTPP') this.#requiredSections.add('@COSMIC2');
+    }
+    // Check sections existence and mark for parsing
+    this.#requiredSections.forEach(sectionName => {
+      const section = this.#sectionsMap.get(sectionName);
+      if (!section) {
+        throw new Error(`Required section ${sectionName} not found in file ${this.currentFileName}`);
+      }
+      section.doParse = true;
+    });
 
     // Validate and Parse
-    const enabledSet = new Set(this.#enabledSections);
-    // 1. Определяем строгий порядок для критичных секций
     const priorityNames = ['@COSMIC2', '@CIVILIZE2'];
-    // 2. Сначала парсим приоритетные (если они включены)
-    priorityNames.forEach(name => {
-      // const section = this.#sectionsMap.get('@COSMIC')
-      const section = this.#parts.find(p => p.name === name && enabledSet.has(name));
-      section?.validateAndParse();
-    });
-    // 3. Парсим всё остальное, исключая уже обработанные
-    this.#parts.forEach(part => {
-      if (enabledSet.has(part.name)) {
-        part.validateAndParse();
-      }
-    });
+    priorityNames.forEach(name => this.#sectionsMap.get(name)?.validateAndParse());
+    this.#parts.forEach(part => part.validateAndParse());
   }
 
   // Геттеры для удобного доступа к данным
-  get cosmic() { return this.#sectionsMap.get('@COSMIC'); }
-  get cosmic2() { return this.#sectionsMap.get('@COSMIC2'); }
-  get civilize() { return this.#sectionsMap.get('@CIVILIZE'); }
-  get civilize2() { return this.#sectionsMap.get('@CIVILIZE2'); }
-  get unitTypes() { return this.#sectionsMap.get('@UNITS')?.data || []; }
-  get terrainTypes() { return this.#sectionsMap.get('@TERRAIN')?.data || []; }
+  get cosmic() { return this.#sectionsMap.get('@COSMIC') }
+  get cosmic2() { return this.#sectionsMap.get('@COSMIC2') }
+  get civilize() { return this.#sectionsMap.get('@CIVILIZE') }
+  get civilize2() { return this.#sectionsMap.get('@CIVILIZE2') }
+  get unitTypes() { return this.#sectionsMap.get('@UNITS') }
+  get terrainTypes() { return this.#sectionsMap.get('@TERRAIN') }
+  get difficulty() { return this.#sectionsMap.get('@DIFFICULTY') }
 
-  stringify(sectionsToUpdate = this.#enabledSections) {
+  stringify(sectionsToUpdate = this.#requiredSections) {
     return this.#parts.map(p => {
       const shouldUpdate = sectionsToUpdate.includes(p.name);
-      const content = p.getLines(this, shouldUpdate).join(this.#lineSeparator);
+      const content = p.getLines(shouldUpdate).join(this.#lineSeparator);
       return p.name ? `${p.name}${this.#lineSeparator}${content}` : content;
     }).join(this.#lineSeparator);
   }

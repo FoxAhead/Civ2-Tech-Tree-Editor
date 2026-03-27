@@ -365,7 +365,7 @@ createApp({
     };
 
     const exportRules = async () => {
-      rulesTxt.saveToFile(rulesTxt.currentFileName || 'RULES.TXT', ['@CIVILIZE']);
+      rulesTxt.saveToFile(rulesTxt.currentFileName || 'RULES.TXT', ['@CIVILIZE', '@CIVILIZE2']);
     };
 
     const exportRulesBak = async () => {

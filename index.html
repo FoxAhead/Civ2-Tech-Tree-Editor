@@ -62,21 +62,25 @@
             <div class=" mb-1 d-flex align-items-center justify-content-between">
               <label for="inputEpoch" class="form-label flex-grow-1">Epoch</label>
               <select id="inputEpoch" v-model.number="state.selectedTech.epoch" class="form-select form-select-sm w-75" style="width: 250px;">
-                <option :value="0">0 = Ancient</option>
-                <option :value="1">1 = Renaissance</option>
-                <option :value="2">2 = Industrial Revolution</option>
-                <option :value="3">3 = Modern</option>
+                <option :value="0">0 - Ancient</option>
+                <option :value="1">1 - Renaissance</option>
+                <option :value="2">2 - Industrial Revolution</option>
+                <option :value="3">3 - Modern</option>
               </select>
             </div>
             <div class="mb-1 d-flex align-items-center justify-content-between">
               <label for="inputCategory" class="form-label flex-grow-1">Category</label>
               <select id="inputCategory" v-model.number="state.selectedTech.category" class="form-select form-select-sm w-75" style="width: 250px;">
-                <option :value="0">0 = Military</option>
-                <option :value="1">1 = Economic</option>
-                <option :value="2">2 = Social</option>
-                <option :value="3">3 = Academic</option>
-                <option :value="4">4 = Applied</option>
+                <option :value="0">0 - Military</option>
+                <option :value="1">1 - Economic</option>
+                <option :value="2">2 - Social</option>
+                <option :value="3">3 - Academic</option>
+                <option :value="4">4 - Applied</option>
               </select>
+            </div>
+            <div v-if="state.selectedTech.group !== undefined" class="mb-1 d-flex align-items-center justify-content-between">
+              <label for="inputGroup" class="form-label flex-grow-1">Group</label>
+              <input type="number" class="form-control form-control-sm text-end w-25" id="inputGroup" v-model.number="state.selectedTech.group" min="0" max="7" />
             </div>
             <div class="mb-1">
               <div class="d-flex justify-content-between align-items-center my-2">
