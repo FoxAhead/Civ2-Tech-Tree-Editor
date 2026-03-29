@@ -22,11 +22,13 @@ html {
 
 /* Сайдбар */
 #sidebar {
-  width: 350px;
-  flex: 0 0 350px;
+  /* width: 350px;
+  flex: 0 0 350px; */
+  width: clamp(150px, 25vw, 350px);
+  flex: 0 0 auto;
   background: #f8f9fa;
   border-right: 1px solid #dee2e6;
-  overflow-y: auto;
+  /* overflow-y: auto; */
   /* Включаем прокрутку, если параметров много */
   transition: margin-left 0.3s ease, opacity 0.3s ease;
   z-index: 10;

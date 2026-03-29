@@ -20,47 +20,91 @@
 
 <body>
   <div id="app" class="d-flex flex-column">
-    <nav class="navbar navbar-expand-lg bg-dark" data-bs-theme="dark">
+    <nav class="navbar bg-dark flex-nowrap" data-bs-theme="dark">
       <div class="container-fluid">
         <div class="d-flex align-items-center">
           <button class="btn btn-outline-light btn-sm me-3" @click="sidebarVisible = !sidebarVisible">
             {{ sidebarVisible ? '✕' : '☰' }}
           </button>
-          <span class="navbar-brand mb-0 h1">Civilization 2 Technology Tree Editor</span>
+          <span class="navbar-brand mb-0 h1">
+            <span class="d-none d-lg-inline">Civilization 2 Technology Tree Editor</span>
+            <span class="d-none d-sm-inline d-lg-none">Civ2 Tech Tree</span>
+          </span>
         </div>
         <div class="d-flex align-items-center gap-2">
           <span class="text-secondary small me-2">
             File: <span class="text-info">{{ currentFileName || 'Default MGE RULES.TXT' }}</span>
           </span>
           <button class="btn btn-sm btn-secondary" @click="$refs.fileInput.click()">
-            <i class="bi bi-folder2-open"></i> Load RULES.TXT...
+            <i class="bi bi-folder2-open"></i>
+            <span class="d-none d-md-inline ms-1">Load RULES.TXT...</span>
           </button>
           <input type="file" ref="fileInput" class="d-none" @change="handleFileUpload" accept=".TXT,.FRE,.GER,.ITA,.SPA">
           <button class="btn btn-sm btn-secondary" @click="exportRules()">
-            <i class="bi bi-download"></i> Save to...
+            <i class="bi bi-download"></i>
+            <span class="d-none d-md-inline ms-1">Save to...</span>
           </button>
         </div>
       </div>
     </nav>
     <div class="flex-grow-1 d-flex overflow-hidden" @dragover.prevent="onDragOver" @dragleave="onDragLeave" @drop="handleDrop" :class="{ 'dragging-active': isDragging }">
-      <aside id="sidebar" :class="{ 'hidden': !sidebarVisible }" class="d-flex flex-column justify-content-between p-3">
-        <div class="overflow-auto">
+      <aside id="sidebar" :class="{ 'hidden': !sidebarVisible }" class="d-flex flex-column justify-content-between p-2">
+        <div class="overflow-x-hidden overflow-y-auto ">
           <div v-if="state.selectedTech" class="text-nowrap small">
             <h5 class="border-bottom pb-2 clickable-tech" @click="focusNode(state.selectedTech.id)" :title="'Focus on ' + getTechName(state.selectedTech.id)">{{ state.selectedTech.id }}</h5>
             <div class="mb-1">
-              <label for="inputName" class="form-label">Name</label>
+              <label for="inputName" class="d-none d-md-inline form-label">Name</label>
               <input class="form-control form-control-sm" maxlength="49" id="inputName" v-model="state.selectedTech.name" />
             </div>
-            <div class="mb-1 d-flex align-items-center justify-content-between">
-              <label for="inputAiValue" class="form-label flex-grow-1">AI Value</label>
+            <!-- <div class="mb-1 d-flex align-items-center justify-content-between">
+              <label for="inputAiValue" class="d-none d-md-inline form-label flex-grow-1">AI Value</label>
+              <label for="inputAiValue" class="d-inline d-md-none form-label flex-grow-1">AI</label>
               <input type="number" class="form-control form-control-sm text-end w-25" id="inputAiValue" v-model.number="state.selectedTech.aiValue" />
             </div>
             <div class="mb-1 d-flex align-items-center justify-content-between">
-              <label for="inputModifier" class="form-label flex-grow-1">Civilized Modifier</label>
+              <label for="inputModifier" class="d-none d-md-inline form-label flex-grow-1">Civilized Modifier</label>
+              <label for="inputModifier" class="d-inline d-md-none form-label flex-grow-1">CivMod</label>
               <input type="number" class="form-control form-control-sm text-end w-25" id="inputModifier" v-model.number="state.selectedTech.modifier" />
+            </div> -->
+            <div class="row mb-1 align-items-center g-1">
+              <div class="col-6 col-md-8 text-truncate">
+                <label for="inputAiValue" class="form-label mb-0">
+                  <span class="d-none d-md-inline">AI Value</span>
+                  <span class="d-inline d-md-none">AI</span>
+                </label>
+              </div>
+              <div class="col-6 col-md-4">
+                <input type="number"
+                  class="form-control form-control-sm text-end"
+                  id="inputAiValue"
+                  v-model.number="state.selectedTech.aiValue" />
+              </div>
             </div>
-            <div class=" mb-1 d-flex align-items-center justify-content-between">
-              <label for="inputEpoch" class="form-label flex-grow-1">Epoch</label>
+            <div class="row mb-1 align-items-center g-1">
+              <div class="col-6 col-md-8 text-truncate">
+                <label for="inputModifier" class="form-label mb-0">
+                  <span class="d-none d-md-inline">Civilized Modifier</span>
+                  <span class="d-inline d-md-none">CivMod</span>
+                </label>
+              </div>
+              <div class="col-6 col-md-4">
+                <input type="number"
+                  class="form-control form-control-sm text-end"
+                  id="inputModifier"
+                  v-model.number="state.selectedTech.modifier" />
+              </div>
+            </div>
+            <div class="row mb-1 align-items-center g-1" v-if="state.selectedTech.group !== undefined">
+              <div class="col-6 col-md-8 text-truncate">
+                <label for="inputGroup" class="form-label mb-0">Group</label>
+              </div>
+              <div class="col-6 col-md-4">
+                <input type="number" class="form-control form-control-sm text-end" id="inputGroup" v-model.number="state.selectedTech.group" min="0" max="7" />
+              </div>
+            </div>
+
+            <!-- <div class=" mb-1 d-flex align-items-center justify-content-between">
+              <label for="inputEpoch" class="d-none d-md-inline form-label flex-grow-1">Epoch</label>
               <select id="inputEpoch" v-model.number="state.selectedTech.epoch" class="form-select form-select-sm w-75" style="width: 250px;">
                 <option :value="0">0 - Ancient</option>
                 <option :value="1">1 - Renaissance</option>
@@ -69,7 +113,7 @@
               </select>
             </div>
             <div class="mb-1 d-flex align-items-center justify-content-between">
-              <label for="inputCategory" class="form-label flex-grow-1">Category</label>
+              <label for="inputCategory" class="d-none d-md-inline form-label flex-grow-1">Category</label>
               <select id="inputCategory" v-model.number="state.selectedTech.category" class="form-select form-select-sm w-75" style="width: 250px;">
                 <option :value="0">0 - Military</option>
                 <option :value="1">1 - Economic</option>
@@ -77,11 +121,38 @@
                 <option :value="3">3 - Academic</option>
                 <option :value="4">4 - Applied</option>
               </select>
+            </div> -->
+            <div class="row mb-1 align-items-center g-2">
+              <!-- Текст: виден только на средних экранах и выше, занимает 4 колонки -->
+              <div class="col-md-4 d-none d-md-block text-truncate">
+                <label for="inputEpoch" class="form-label mb-0">Epoch</label>
+              </div>
+              <!-- Список: на мобильных занимает все 12 колонок, на десктопе — оставшиеся 8 -->
+              <div class="col-12 col-md-8">
+                <select id="inputEpoch" v-model.number="state.selectedTech.epoch" class="form-select form-select-sm">
+                  <option :value="0">0 - Ancient</option>
+                  <option :value="1">1 - Renaissance</option>
+                  <option :value="2">2 - Industrial Revolution</option>
+                  <option :value="3">3 - Modern</option>
+                </select>
+              </div>
             </div>
-            <div v-if="state.selectedTech.group !== undefined" class="mb-1 d-flex align-items-center justify-content-between">
-              <label for="inputGroup" class="form-label flex-grow-1">Group</label>
-              <input type="number" class="form-control form-control-sm text-end w-25" id="inputGroup" v-model.number="state.selectedTech.group" min="0" max="7" />
+
+            <div class="row mb-1 align-items-center g-2">
+              <div class="col-md-4 d-none d-md-block text-truncate">
+                <label for="inputCategory" class="form-label mb-0">Category</label>
+              </div>
+              <div class="col-12 col-md-8">
+                <select id="inputCategory" v-model.number="state.selectedTech.category" class="form-select form-select-sm">
+                  <option :value="0">0 - Military</option>
+                  <option :value="1">1 - Economic</option>
+                  <option :value="2">2 - Social</option>
+                  <option :value="3">3 - Academic</option>
+                  <option :value="4">4 - Applied</option>
+                </select>
+              </div>
             </div>
+
             <div class="mb-1">
               <div class="d-flex justify-content-between align-items-center my-2">
                 <label class="form-label">Prerequisites</label>

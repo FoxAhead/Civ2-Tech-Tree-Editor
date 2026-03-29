@@ -27,6 +27,7 @@ createApp({
     let errorModal = null;
     let network = null;
     let rulesTxt = null;
+    let networkPosition = {};
 
     const renderGraph = (techs) => {
       if (network) network.fit();
@@ -35,6 +36,11 @@ createApp({
 
     onMounted(() => {
       errorModal = new bootstrap.Modal(errorModalContainer.value);
+
+      const resizeObserver = new ResizeObserver(() => {
+        restoreNetworkPosition();
+      });
+      resizeObserver.observe(visContainer.value);
 
       const options = {
         // configure: {
@@ -146,6 +152,36 @@ createApp({
       // network.on('deselectEdge', (params) => {
       //   console.log('deselectEdge:', params);
       // });
+      const saveNetworkPosition = () => {
+        const domWidth = network.canvas.frame.canvas.clientWidth;
+        const domHeight = network.canvas.frame.canvas.clientHeight;
+        const { x, y } = network.getViewPosition();
+        const scale = network.getScale();
+        networkPosition = {
+          position: {
+            x: x - (domWidth / 2) / scale,
+            y: y - (domHeight / 2) / scale,
+          },
+          scale: scale,
+        };
+      }
+      const restoreNetworkPosition = () => {
+        if (networkPosition.scale) {
+          const domWidth = network.canvas.frame.canvas.clientWidth;
+          const domHeight = network.canvas.frame.canvas.clientHeight;
+          const scale = networkPosition.scale;
+          network.moveTo({
+            position: {
+              x: networkPosition.position.x + (domWidth / 2) / scale,
+              y: networkPosition.position.y + (domHeight / 2) / scale,
+            },
+            scale: scale,
+          });
+        }
+      }
+      network.on('zoom', (params) => {
+        saveNetworkPosition();
+      });
 
       network.on('dragStart', (params) => {
         // console.log('dragStart', params);
@@ -207,6 +243,7 @@ createApp({
           lineUpUnusedNodes();
           techTree.needLineUp = false;
         }
+        saveNetworkPosition();
       });
       // network.on('animationFinished', () => {
       //   console.log('animationFinished');
