@@ -246,3 +246,57 @@ export function getVisEdgesFromGraph(g) {
     }
   });
 }
+
+export function smoothVerticalPositions(network, nodes, edges) {
+  const allNodes = nodes.get();
+  const allEdges = edges.get();
+  for (let iter = 0; iter < 10; iter++) {
+    allNodes.forEach(node => {
+      const connectedEdges = allEdges.filter(e => e.from === node.id || e.to === node.id);
+      if (connectedEdges.length === 0) return;
+      let sumY = 0;
+      let count = 0;
+      connectedEdges.forEach(edge => {
+        const otherId = (edge.from === node.id) ? edge.to : edge.from;
+        const otherNode = nodes.get(otherId);
+        const otherNodePos = network.getPosition(otherId);
+        if (otherNode && otherNodePos.y !== undefined) {
+          sumY += otherNodePos.y;
+          count++;
+        }
+      });
+      if (count > 0) {
+        const avgY = sumY / count;
+        const nodePos = network.getPosition(node.id);
+        network.moveNode(node.id, nodePos.x, nodePos.y + (avgY - nodePos.y) * 0.5);
+      }
+    });
+  }
+}
+
+export function drawPreqsPoints(ctx, network, nodes) {
+  nodes.forEach(node => {
+    const box = network.getBoundingBox(node.id);
+    if (!box) return;
+    const yCenter = (box.top + box.bottom) / 2;
+    const xPos = box.left + 6;
+    const drawSlot = (yOffset, pId) => {
+      let style = {};
+      if (pId === 'no')
+        style = { fillColor: '#FFF', lineColor: '#C00', lineWidth: 2 };
+      else if (pId === 'nil')
+        style = { fillColor: '#FFF', lineColor: '#000', lineWidth: 1 };
+      else
+        style = { fillColor: nodes.get(pId) ? selColor : '#F00', lineColor: '#000', lineWidth: 1 };
+      ctx.beginPath();
+      ctx.arc(xPos, yCenter + yOffset, 5, 0, 2 * Math.PI);
+      ctx.fillStyle = style.fillColor;
+      ctx.fill();
+      ctx.strokeStyle = style.lineColor;
+      ctx.lineWidth = style.lineWidth;
+      ctx.stroke();
+    };
+    drawSlot(-10, node.tech.preq[0]);
+    drawSlot(10, node.tech.preq[1]);
+  });
+}

@@ -414,6 +414,11 @@ export default class TechTree {
     }
   }
 
+  canDeleteEdge(edgeData) {
+    // console.log('Can deleteEdge?', edgeData);
+    return true;
+  }
+
   techUpdated(tech) {
     // console.log("techUpdated");
     const node = this.nodes.get(tech.id);

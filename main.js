@@ -4,6 +4,8 @@ import TechTree from './TechTree.js';
 
 const { createApp, reactive, ref, onMounted, watch, computed } = Vue;
 
+const RULES_LOAD_SECTIONS = ['@CIVILIZE', '@IMPROVE', '@UNITS', '@ENDWONDER'];
+
 // console.log = function () { };
 
 createApp({
@@ -77,8 +79,7 @@ createApp({
             callback(techTree.canChangeEdge(edgeData) ? edgeData : null);
           },
           deleteEdge: (edgeData, callback) => {
-            // console.log('Can deleteEdge?', edgeData);
-            callback(edgeData);
+            callback(techTree.canDeleteEdge(edgeData) ? edgeData : null);
           }
         },
         physics: {
@@ -88,34 +89,10 @@ createApp({
       };
 
       network = new vis.Network(visContainer.value, { nodes: nodes, edges: edges }, options);
-      // techTree.network = network;
 
       network.on('afterDrawing', function (ctx) {
         // console.log('afterDrawing');
-        nodes.forEach(node => {
-          const box = network.getBoundingBox(node.id);
-          if (!box) return;
-          const yCenter = (box.top + box.bottom) / 2;
-          const xPos = box.left + 6;
-          const drawSlot = (yOffset, pId) => {
-            let style = {};
-            if (pId === 'no')
-              style = { fillColor: '#FFF', lineColor: '#C00', lineWidth: 2 };
-            else if (pId === 'nil')
-              style = { fillColor: '#FFF', lineColor: '#000', lineWidth: 1 };
-            else
-              style = { fillColor: nodes.get(pId) ? Utils.selColor : '#F00', lineColor: '#000', lineWidth: 1 };
-            ctx.beginPath();
-            ctx.arc(xPos, yCenter + yOffset, 5, 0, 2 * Math.PI);
-            ctx.fillStyle = style.fillColor;
-            ctx.fill();
-            ctx.strokeStyle = style.lineColor;
-            ctx.lineWidth = style.lineWidth;
-            ctx.stroke();
-          };
-          drawSlot(-10, node.tech.preq[0]);
-          drawSlot(10, node.tech.preq[1]);
-        });
+        Utils.drawPreqsPoints(ctx, network, nodes);
       });
 
       network.on('click', (params) => {
@@ -126,10 +103,6 @@ createApp({
         //   console.log('edge:', edges.get(params.edges[0]));
         state.selectedTech = params.nodes.length > 0 ? nodes.get(params.nodes[0]).tech : null;
       });
-
-      // Сохраняем ID узлов, которые мы "подсветили", чтобы быстро их сбросить
-      // let highlightedNodes = [];
-      // let highlightedEdges = [];
 
       // network.on('select', (params) => {
       //   console.log('select:', params);
@@ -189,7 +162,6 @@ createApp({
       // });
 
       // network.once('stabilized', () => {
-      //   // Выключаем иерархию, чтобы разрешить свободное движение по Y
       //   // network.setOptions({ layout: { hierarchical: false } });
       //   console.log('stabilized');
       //   // smoothVerticalPositions();
@@ -234,39 +206,7 @@ createApp({
     }
 
     const smoothVerticalPositions = () => {
-      const allNodes = nodes.get();
-      const allEdges = edges.get();
-
-      for (let iter = 0; iter < 10; iter++) {
-        allNodes.forEach(node => {
-          const connectedEdges = allEdges.filter(e => e.from === node.id || e.to === node.id);
-          if (connectedEdges.length === 0) return;
-
-          let sumY = 0;
-          let count = 0;
-
-          connectedEdges.forEach(edge => {
-            const otherId = (edge.from === node.id) ? edge.to : edge.from;
-            const otherNode = nodes.get(otherId);
-            const otherNodePos = network.getPosition(otherId);
-            if (otherNode && otherNodePos.y !== undefined) {
-              sumY += otherNodePos.y;
-              count++;
-            }
-          });
-
-          if (count > 0) {
-            const avgY = sumY / count;
-            // Плавно двигаем узел к средней точке (коэффициент 0.5 для стабильности)
-            const nodePos = network.getPosition(node.id);
-            network.moveNode(node.id, nodePos.x, nodePos.y + (avgY - nodePos.y) * 0.5);
-            // node.y = node.y + (avgY - node.y) * 0.5;
-          }
-        });
-      }
-
-      // Применяем обновленные координаты
-      // nodes.update(allNodes);
+      Utils.smoothVerticalPositions(network, nodes, edges);
     }
 
     watch(() => state.selectedTech, (newTech, oldTech) => {
@@ -283,7 +223,7 @@ createApp({
     };
     const loadDefaultRules = async () => {
       try {
-        const newRulesTxt = await RulesTxt.loadFromFile('RULES.TXT', ['@CIVILIZE']);
+        const newRulesTxt = await RulesTxt.loadFromFile('RULES.TXT', RULES_LOAD_SECTIONS);
         rulesTxt = newRulesTxt;
         errorMessage.value = '';
         getAndRenderTechsFromRulesTxt();
@@ -295,7 +235,7 @@ createApp({
     // Custom RULES.TXT
     const loadCustomRulesTxt = async (file) => {
       try {
-        const newRulesTxt = await RulesTxt.loadFromFile(file, ['@CIVILIZE']);
+        const newRulesTxt = await RulesTxt.loadFromFile(file, RULES_LOAD_SECTIONS);
         currentFileName.value = newRulesTxt.currentFileName;
         rulesTxt = newRulesTxt;
         errorMessage.value = '';
@@ -368,45 +308,40 @@ createApp({
       rulesTxt.saveToFile(rulesTxt.currentFileName || 'RULES.TXT', ['@CIVILIZE', '@CIVILIZE2']);
     };
 
-    const exportRulesBak = async () => {
-      if (!state.techs) return;
-
-      const header = "@CIVILIZE\r\n";
-      const body = state.techs.map(t => t.serialize()).join('\r\n');
-      const fullText = header + body;
-
-      // Проверяем, поддерживает ли браузер новое API
-      if ('showSaveFilePicker' in window) {
-        try {
-          const handle = await window.showSaveFilePicker({
-            suggestedName: 'RULES.TXT',
-            types: [{
-              description: 'Civ2 Rules File',
-              accept: { 'text/plain': ['.TXT'] },
-            }],
-          });
-          const writable = await handle.createWritable();
-          await writable.write(fullText);
-          await writable.close();
-        } catch (err) {
-          console.log('Пользователь отменил сохранение или произошла ошибка');
-        }
-      } else {
-        // Фолбэк для старых браузеров (просто скачивание)
-        const blob = new Blob([fullText], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'RULESOUT.TXT';
-        link.click();
-        URL.revokeObjectURL(url);
-      }
-    };
-
     const getLastModified = computed(() => {
       return document.lastModified;
     })
 
+    const unlockedImprovements = computed(() => {
+      if (!state.selectedTech || !rulesTxt?.improve?.data) return [];
+      return rulesTxt.improve.data.filter(item => item.preq === state.selectedTech.id);
+    });
+
+    const unlockedUnits = computed(() => {
+      if (!state.selectedTech || !rulesTxt?.units?.data) return [];
+      return rulesTxt.units.data.filter(item => item.preq === state.selectedTech.id);
+    });
+
+    // const canceledWonders = computed(() => {
+    //   if (!state.selectedTech || !rulesTxt?.units?.data) return [];
+    //   return rulesTxt.units.data.filter(item => item.preq === state.selectedTech.id);
+    // });
+
+    const canceledWonders = computed(() => {
+      if (!state.selectedTech || !rulesTxt?.endWonder?.data || !rulesTxt?.improve?.data) return [];
+
+      // Чудеса в IMPROVE обычно начинаются с индекса 39 (или 40, если считать с 1)
+      const WONDER_START_INDEX = 39;
+
+      return rulesTxt.endWonder.data
+        .map((item, index) => ({ ...item, index })) // Сохраняем исходный индекс
+        .filter(item => item.techId === state.selectedTech.id) // Ищем совпадения по технологии
+        .map(item => {
+          // Находим соответствующее Чудо в списке строений
+          const wonderData = rulesTxt.improve.data[WONDER_START_INDEX + item.index];
+          return wonderData ? wonderData.name : `Wonder #${item.index}`;
+        });
+    });
     return {
       state,
       sidebarVisible,
@@ -426,6 +361,9 @@ createApp({
       currentFileName,
       errorMessage,
       getLastModified,
+      unlockedImprovements,
+      unlockedUnits,
+      canceledWonders,
     };
   },
 }).mount('#app');

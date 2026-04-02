@@ -1,6 +1,7 @@
 import { Tech } from "./Tech.js";
 import { UnitType } from "./UnitType.js";
 import { TerrainType } from "./TerrainType.js";
+import { Improvement } from "./Improvement.js";
 
 const langEncodings = {
   'TXT': 'windows-1252', 'RUS': 'windows-1251', 'POL': 'windows-1250'
@@ -32,9 +33,12 @@ class Section {
     }
   }
   parse() {
-    this.data = this.lines.map((line, i) => this.parseLine(line, i))
+    this.data = this.lines.map((line, i) => {
+      const tokens = line.split(';')[0].split(',').map(t => t.trim());
+      return this.parseLine(line, i, tokens)
+    })
   }
-  parseLine(line, index) {
+  parseLine(line, index, tokens) {
     return line;
   }
   getLines(doSerialize = false) {
@@ -122,8 +126,7 @@ class SectionCivilize extends Section {
       ToTPP: this.rules.cosmic2?.data?.NumberOfTechs ?? 100
     };
   }
-  parseLine(line, index) {
-    const tokens = line.split(';')[0].split(',').map(t => t.trim());
+  parseLine(line, index, tokens) {
     return new Tech({
       id: SectionCivilize.techIds[index],
       index: index,
@@ -164,8 +167,7 @@ class SectionCivilize2 extends Section {
       ToTPP: this.rules.cosmic2?.data?.NumberOfTechs ?? 100
     };
   }
-  parseLine(line, index) {
-    const tokens = line.split(';')[0].split(',').map(t => t.trim());
+  parseLine(line, index, tokens) {
     return {
       id: SectionCivilize.techIds[index],
       index: index,
@@ -179,9 +181,27 @@ class SectionCivilize2 extends Section {
   }
 }
 
+class SectionImprove extends Section {
+  parseLine(line, index, tokens) {
+    return new Improvement({
+      name: tokens[0],
+      cost: tokens[1],
+      upkeep: tokens[2],
+      preq: tokens[3],
+    });
+  }
+}
+
+class SectionEndWonder extends Section {
+  parseLine(line, index, tokens) {
+    return {
+      techId: tokens[0],
+    };
+  }
+}
+
 class SectionUnits extends Section {
-  parseLine(line, index) {
-    const tokens = line.split(';')[0].split(',').map(t => t.trim());
+  parseLine(line, index, tokens) {
     return new UnitType({
       name: tokens[0],
       until: tokens[1],
@@ -210,8 +230,7 @@ class SectionUnits extends Section {
 }
 
 class SectionTerrain extends Section {
-  parseLine(line, index) {
-    const tokens = line.split(';')[0].split(',').map(t => t.trim());
+  parseLine(line, index, tokens) {
     return new TerrainType({
       name: tokens[0],
       movecost: parseInt(tokens[1]),
@@ -232,6 +251,8 @@ const SECTION_CLASSES = {
   '@COSMIC2': SectionCosmic2,
   '@CIVILIZE': SectionCivilize,
   '@CIVILIZE2': SectionCivilize2,
+  '@IMPROVE': SectionImprove,
+  '@ENDWONDER': SectionEndWonder,
   '@UNITS': SectionUnits,
   '@TERRAIN': SectionTerrain,
   '@DIFFICULTY': SectionDifficulty,
@@ -336,7 +357,9 @@ export class RulesTxt {
   get cosmic2() { return this.#sectionsMap.get('@COSMIC2') }
   get civilize() { return this.#sectionsMap.get('@CIVILIZE') }
   get civilize2() { return this.#sectionsMap.get('@CIVILIZE2') }
-  get unitTypes() { return this.#sectionsMap.get('@UNITS') }
+  get improve() { return this.#sectionsMap.get('@IMPROVE') }
+  get endWonder() { return this.#sectionsMap.get('@ENDWONDER') }
+  get units() { return this.#sectionsMap.get('@UNITS') }
   get terrainTypes() { return this.#sectionsMap.get('@TERRAIN') }
   get difficulty() { return this.#sectionsMap.get('@DIFFICULTY') }
 

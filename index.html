@@ -103,6 +103,26 @@
                 </button>
               </div>
             </div>
+            <div class="mb-1">
+              <div v-if="unlockedImprovements.length > 0">
+                <label class="form-label">City Improvements</label>
+                <ul class="mb-1">
+                  <li v-for="imp in unlockedImprovements" :key="imp.id">{{ imp.name }}</li>
+                </ul>
+              </div>
+              <div v-if="unlockedUnits.length > 0">
+                <label class="form-label">Unit Types</label>
+                <ul class="mb-1">
+                  <li v-for="unit in unlockedUnits" :key="unit.id">{{ unit.name }}</li>
+                </ul>
+              </div>
+              <div v-if="canceledWonders.length > 0">
+                <label class="form-label">Canceled Wonders</label>
+                <ul class="mb-1">
+                  <li v-for="wonder in canceledWonders" :key="wonder">{{ wonder }}</li>
+                </ul>
+              </div>
+            </div>
           </div>
           <div v-else class="text-center text-muted mt-5 px-3">
             Select node on the graph to edit
@@ -128,7 +148,7 @@
             </div>
           </div>
         </div>
-        <div class="small">Version 3 ({{ getLastModified }})
+        <div class="small text-secondary">Version 4 ({{ getLastModified }})
           - <a href="https://github.com/FoxAhead/Civ2-Tech-Tree-Editor">GitHub</a>
         </div>
       </aside>
