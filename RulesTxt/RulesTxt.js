@@ -184,6 +184,7 @@ class SectionCivilize2 extends Section {
 class SectionImprove extends Section {
   parseLine(line, index, tokens) {
     return new Improvement({
+      index: index,
       name: tokens[0],
       cost: tokens[1],
       upkeep: tokens[2],

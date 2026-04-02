@@ -5,12 +5,20 @@ import TechTree from './TechTree.js';
 const { createApp, reactive, ref, onMounted, watch, computed } = Vue;
 
 const RULES_LOAD_SECTIONS = ['@CIVILIZE', '@IMPROVE', '@UNITS', '@ENDWONDER'];
+const WONDER_START_INDEX = 39;
+const ICONS = {
+  building: '&#127968;',
+  wonder: '&#11088;',
+  unit: '&#9823;',
+  cancel: '&#128683;',
+};
 
 // console.log = function () { };
 
 createApp({
   setup() {
     const sidebarVisible = ref(true);
+    const searchDropdownContainer = ref(null);
     const visContainer = ref(null);
     const errorModalContainer = ref(null);
     const errorMessage = ref('');
@@ -36,6 +44,8 @@ createApp({
     };
 
     onMounted(() => {
+      searchDropdownContainer.value.addEventListener('shown.bs.dropdown', searchFocus);
+      searchDropdownContainer.value.addEventListener('hidden.bs.dropdown', searchReset);
       errorModal = new bootstrap.Modal(errorModalContainer.value);
 
       const options = {
@@ -298,6 +308,11 @@ createApp({
       state.selectedTech = nodes.get(nodeId).tech;
     };
 
+    const selectTechById = (id) => {
+      focusNode(id);
+      searchQuery.value = '';
+    };
+
     const swapPreqs = () => {
       if (!state.selectedTech) return;
       techTree.swapPreqs(state.selectedTech);
@@ -312,58 +327,129 @@ createApp({
       return document.lastModified;
     })
 
-    const unlockedImprovements = computed(() => {
+    // Related game objects
+    const unlockedBuildings = computed(() => {
       if (!state.selectedTech || !rulesTxt?.improve?.data) return [];
-      return rulesTxt.improve.data.filter(item => item.preq === state.selectedTech.id);
+      return rulesTxt.improve.data.filter(item => item.preq === state.selectedTech.id && item.index < WONDER_START_INDEX);
     });
-
+    const unlockedWonders = computed(() => {
+      if (!state.selectedTech || !rulesTxt?.improve?.data) return [];
+      return rulesTxt.improve.data.filter(item => item.preq === state.selectedTech.id && item.index >= WONDER_START_INDEX);
+    });
     const unlockedUnits = computed(() => {
       if (!state.selectedTech || !rulesTxt?.units?.data) return [];
       return rulesTxt.units.data.filter(item => item.preq === state.selectedTech.id);
     });
-
-    // const canceledWonders = computed(() => {
-    //   if (!state.selectedTech || !rulesTxt?.units?.data) return [];
-    //   return rulesTxt.units.data.filter(item => item.preq === state.selectedTech.id);
-    // });
-
     const canceledWonders = computed(() => {
       if (!state.selectedTech || !rulesTxt?.endWonder?.data || !rulesTxt?.improve?.data) return [];
-
-      // Чудеса в IMPROVE обычно начинаются с индекса 39 (или 40, если считать с 1)
-      const WONDER_START_INDEX = 39;
-
       return rulesTxt.endWonder.data
-        .map((item, index) => ({ ...item, index })) // Сохраняем исходный индекс
-        .filter(item => item.techId === state.selectedTech.id) // Ищем совпадения по технологии
+        .map((item, index) => ({ ...item, index }))
+        .filter(item => item.techId === state.selectedTech.id)
         .map(item => {
-          // Находим соответствующее Чудо в списке строений
           const wonderData = rulesTxt.improve.data[WONDER_START_INDEX + item.index];
           return wonderData ? wonderData.name : `Wonder #${item.index}`;
         });
     });
+
+    // Search functionality
+    const searchInputElement = ref(null);
+    const searchQuery = ref('');
+    const searchReset = () => {
+      searchQuery.value = '';
+    };
+    const searchFocus = () => {
+      if (searchInputElement.value) searchInputElement.value.focus();
+    };
+    const filteredTechs = computed(() => {
+      const query = searchQuery.value.toLowerCase().trim();
+      if (!query) return state.techs.map(tech => ({ tech: tech, matches: [] }));
+      return state.techs.map(tech => {
+        const matches = [];
+        // 0. Technology
+        const techMatches = tech.id.toLowerCase().includes(query) || tech.name.toLowerCase().includes(query);
+        // 1. Unit Types
+        if (rulesTxt?.units?.data) {
+          rulesTxt.units.data.forEach(unit => {
+            if (unit.preq === tech.id && unit.name.toLowerCase().includes(query)) {
+              matches.push({ type: 'unit', name: unit.name, icon: ICONS.unit });
+            }
+          });
+        }
+        // 2. City Improvements
+        if (rulesTxt?.improve?.data) {
+          rulesTxt.improve.data.forEach((imp, index) => {
+            if (imp.preq === tech.id && imp.name.toLowerCase().includes(query)) {
+              const isWonder = index >= WONDER_START_INDEX;
+              matches.push({
+                type: isWonder ? 'wonder' : 'building',
+                name: imp.name,
+                icon: isWonder ? ICONS.wonder : ICONS.building
+              });
+            }
+          });
+        }
+        // 3. Canceled Wonders
+        if (rulesTxt?.endWonder?.data) {
+          rulesTxt.endWonder.data.forEach((ew, index) => {
+            if (ew.techId === tech.id) {
+              const wonderData = rulesTxt.improve.data[WONDER_START_INDEX + index];
+              const name = wonderData ? wonderData.name : `Wonder #${index}`;
+              if (name.toLowerCase().includes(query)) {
+                matches.push({ type: 'cancel', name: name, icon: ICONS.cancel });
+              }
+            }
+          });
+        }
+        if (techMatches || matches.length > 0) {
+          return { tech: tech, matches: matches };
+        }
+        return null;
+      }).filter(Boolean);
+    });
+    const highlight = (text) => {
+      if (!text) return '';
+      const query = searchQuery.value?.trim();
+      if (!query) return text;
+      const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`(${escapedQuery})`, 'gi');
+      return String(text).replace(regex, '<mark class="p-0 bg-warning text-dark">$1</mark>');
+    };
+
     return {
+      ICONS,
       state,
       sidebarVisible,
       visContainer,
-      errorModalContainer,
       handleFileUpload,
-      handleDrop,
-      onDragOver,
-      onDragLeave,
-      isDragging,
       getTechName,
       getPreqColorClass,
       setTechPreq,
       focusNode,
+      selectTechById,
       swapPreqs,
       exportRules,
       currentFileName,
-      errorMessage,
-      getLastModified,
-      unlockedImprovements,
+      // DragDrop file
+      handleDrop,
+      onDragOver,
+      onDragLeave,
+      isDragging,
+      // Related game objects
+      unlockedBuildings,
+      unlockedWonders,
       unlockedUnits,
       canceledWonders,
+      // Search functionality
+      searchDropdownContainer,
+      searchQuery,
+      searchInputElement,
+      filteredTechs,
+      highlight,
+      // Graph Issues
+      errorModalContainer,
+      errorMessage,
+      // Version
+      getLastModified,
     };
   },
 }).mount('#app');

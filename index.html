@@ -27,6 +27,38 @@
             {{ sidebarVisible ? '✕' : '☰' }}
           </button>
           <span class="navbar-brand mb-0 h1">Civilization 2 Technology Tree Editor</span>
+          <!-- Search dropdown -->
+          <div class="dropdown" ref="searchDropdownContainer" data-bs-theme="light">
+            <button class="btn btn-sm btn-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-search"></i>
+            </button>
+            <div class="dropdown-menu p-2" style="min-width: 250px;">
+              <div class="mb-1">
+                <input ref="searchInputElement" v-model="searchQuery" type="text" class="form-control form-control-sm" placeholder="Search ID or Name...">
+              </div>
+              <div class="overflow-auto small" style="max-height: 75vh; cursor: default;">
+                <div v-for="item in filteredTechs" :key="item.tech.id"
+                  @click="selectTechById(item.tech.id)"
+                  class="dropdown-item py-2 px-2 border-bottom">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <span class="fw-bold me-3" v-html="highlight(item.tech.id)"></span>
+                    <span class="text-truncate flex-grow-1 text-end small" v-html="highlight(item.tech.name)"></span>
+                  </div>
+                  <div v-if="item.matches.length" class="d-flex flex-wrap gap-1 mt-1">
+                    <span v-for="match in item.matches" :key="match.name"
+                      class="badge bg-light text-secondary border-0 p-0 me-1"
+                      style="font-size: 0.7rem;">
+                      <span v-html="match.icon"></span>
+                      <span v-html="highlight(match.name)" class="ms-1"></span>
+                    </span>
+                  </div>
+                </div>
+                <div v-if="filteredTechs.length === 0" class="text-center text-muted pt-2">
+                  Nothing found
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="d-flex align-items-center gap-2">
           <span class="text-secondary small me-2">
@@ -44,7 +76,7 @@
     </nav>
     <div class="flex-grow-1 d-flex overflow-hidden" @dragover.prevent="onDragOver" @dragleave="onDragLeave" @drop="handleDrop" :class="{ 'dragging-active': isDragging }">
       <aside id="sidebar" :class="{ 'hidden': !sidebarVisible }" class="d-flex flex-column justify-content-between p-3">
-        <div class="overflow-auto">
+        <div class="flex-grow-1 overflow-auto">
           <div v-if="state.selectedTech" class="text-nowrap small">
             <h5 class="border-bottom pb-2 clickable-tech" @click="focusNode(state.selectedTech.id)" :title="'Focus on ' + getTechName(state.selectedTech.id)">{{ state.selectedTech.id }}</h5>
             <div class="mb-1">
@@ -103,23 +135,30 @@
                 </button>
               </div>
             </div>
+            <!-- Related game objects: City Improvements, Unit Types, Wonders -->
             <div class="mb-1">
-              <div v-if="unlockedImprovements.length > 0">
+              <div v-if="unlockedBuildings.length > 0">
                 <label class="form-label">City Improvements</label>
-                <ul class="mb-1">
-                  <li v-for="imp in unlockedImprovements" :key="imp.id">{{ imp.name }}</li>
+                <ul class="mb-1 list-unstyled">
+                  <li v-for="imp in unlockedBuildings"><span class="mx-2" v-html="ICONS.building"></span>{{ imp.name }}</li>
+                </ul>
+              </div>
+              <div v-if="unlockedWonders.length > 0">
+                <label class="form-label">Wonders</label>
+                <ul class="mb-1 list-unstyled">
+                  <li v-for="imp in unlockedWonders"><span class="mx-2" v-html="ICONS.wonder"></span>{{ imp.name }}</li>
                 </ul>
               </div>
               <div v-if="unlockedUnits.length > 0">
                 <label class="form-label">Unit Types</label>
-                <ul class="mb-1">
-                  <li v-for="unit in unlockedUnits" :key="unit.id">{{ unit.name }}</li>
+                <ul class="mb-1 list-unstyled">
+                  <li v-for="unit in unlockedUnits"><span class="mx-2" v-html="ICONS.unit"></span>{{ unit.name }}</li>
                 </ul>
               </div>
               <div v-if="canceledWonders.length > 0">
                 <label class="form-label">Canceled Wonders</label>
-                <ul class="mb-1">
-                  <li v-for="wonder in canceledWonders" :key="wonder">{{ wonder }}</li>
+                <ul class="mb-1 list-unstyled">
+                  <li v-for="wonder in canceledWonders"><span class="mx-2" v-html="ICONS.cancel"></span>{{ wonder }}</li>
                 </ul>
               </div>
             </div>
@@ -148,7 +187,7 @@
             </div>
           </div>
         </div>
-        <div class="small text-secondary">Version 4 ({{ getLastModified }})
+        <div class="small text-secondary">Version 5 ({{ getLastModified }})
           - <a href="https://github.com/FoxAhead/Civ2-Tech-Tree-Editor">GitHub</a>
         </div>
       </aside>
